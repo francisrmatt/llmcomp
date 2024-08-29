@@ -5,29 +5,27 @@ import functools
 import time
 from typing import Callable, Mapping
 
-from absl import app
-from absl import flags
-from absl import logging
-
 import tqdm
 import numpy as np
 import gzip
 import random
+import logging.config
 
-import btransformer
-import llama
+import config
+import language_model
 
-
-COMPRESS_FN_DICT: Mapping[str, Compressor] = {
+COMPRESS_FN_DICT = { #Mapping[str, Compressor] = {
     'gzip': functools.partial(gzip.compress, compresslevel=9),
-    'transformer': btransformer.compress,
-    'llama': llama.compress,
+    'transformer': language_model.compress,
+    'llama': language_model.compress,
 }
 
 def evaluate_compressor(
     compress_fn_name: str,
-    data: list[list[float | int]],
-    mask_fn,
+    data: Generator,
+    mask_fn : Callable,
+    n_chunks: int, # These should be moved to a global config
+    context_l: int,
     use_tqdm: bool = True,
 ) -> tuple[float, float]:
   """Evaluates the compressor on the chunked dataset.
@@ -44,16 +42,18 @@ def evaluate_compressor(
     The compression rate and the total running time.
   """
 
+  # Logger
+  logging.config.dictConfig(config.LOGGING_CONFIG)
+  logger = logging.getLogger(__name__) 
+
+  logger.info(f'Compressing {n_chunks=} with {compress_fn_name}')
+
   num_missed_bits = running_time = raw_length = compressed_length = 0
 
-  # n_chunks, how many data we are copmressing
-  # chunk_size, length of each individaul data
-  n_chunks = len(data)
-  context_l = len(data[0])
+  compress_fn = COMPRESS_FN_DICT[compress_fn_name]
 
-  compress_fn = COMPRESS_FN_DICT['compress_fn_name']
-
-  for datum in data:
+  for i, datum in enumerate(data):
+    logger.info(f'Compressing {i}th batch')
     if mask_fn is not None:
       datum, missed_bits = mask_fn(datum)
       num_missed_bits += missed_bits
@@ -63,7 +63,7 @@ def evaluate_compressor(
     t1 = time.perf_counter()
 
     running_time += t1 - t0
-    raw_length += len(data)
+    raw_length += len(datum)
     compressed_length += len(compressed_data)
 
   # Since language models are trained on ASCII strings, they cannot handle all
@@ -82,6 +82,7 @@ def evaluate_compressor(
 
   return compressed_length / raw_length, running_time
 
+"""
 def main(_) -> None:
   logging.info('Compressor: %s', _COMPRESSOR.value)
   logging.info('Dataset: %s', _DATASET.value)
@@ -132,3 +133,4 @@ def main(_) -> None:
 
 if __name__ == '__main__':
   app.run(main)
+"""

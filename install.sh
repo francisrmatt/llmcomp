@@ -9,5 +9,7 @@ pip install absl
 pip install jax
 pip install tqdm
 pip install matplotlib
+pip install dm-haiku
+pip install tensorflow
 
 conda deactivate

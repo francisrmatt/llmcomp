@@ -7,21 +7,28 @@ import numpy as np
 
 import config
 import get_data
+import compressor
 
 def go_go():
 
-    n_chunks = 1
+    logging.config.dictConfig(config.LOGGING_CONFIG)
+    logger = logging.getLogger()
+    logger.info("Starting new run")
+
+    n_chunks = 10
     cw = 128
     filename = 0
-    compressor = 'gzip'
+    compressor_name = 'btransformer'
 
+    # Fetch data
     data = get_data.fetch(n_chunks, cw, filename)
-    for datum in data:
-        plt.plot(np.frombuffer(datum, dtype = np.uint8))
-        plt.savefig('foo.png')
+
+    # Compress data 
+    rate, time = compressor.evaluate_compressor(compressor_name, data, None, n_chunks, cw)
+    logger.info(f'Compressor ran with {rate=} and {time=}')
+
+
+
 
 if __name__ == '__main__':
-    logging.config.dictConfig(config.LOGGING_CONFIG)
-    logger = logging.getLogger(__name__)
-    logger.info("Starting new run")
     go_go()
