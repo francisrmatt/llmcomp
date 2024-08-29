@@ -7,7 +7,7 @@ import logging.config
 import os
 import sys
 from numpy.lib.stride_tricks import sliding_window_view
-import config
+import constants
 
 import matplotlib.pyplot as plt
 
@@ -27,7 +27,7 @@ def fetch(n_chunks: int,
     """
 
     # Logging config
-    logging.config.dictConfig(config.LOGGING_CONFIG)
+    logging.config.dictConfig(constants.LOGGING_CONFIG)
     logger = logging.getLogger(__name__) 
 
     # All file names should be in the format data/wX.data where X is an integer.

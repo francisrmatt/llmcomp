@@ -12,6 +12,9 @@ import arithmetic_coder
 import utils
 from btransformer import transformer
 
+import constants
+import logging.config
+
 import sys
 import audioop
 
@@ -37,7 +40,7 @@ def _retrieve_predict_fn(
     params: hk.Params,
 ) -> Callable[[np.ndarray], np.ndarray]:
   """Returns the prediction function for the trained model."""
-  config = transformer.TransformerConfig(vocab_size=config.ALPHABET_SIZE)
+  config = transformer.TransformerConfig(vocab_size=constants.ALPHABET_SIZE)
   model = hk.transform(
       functools.partial(transformer.transformer_decoder, config=config)
   )

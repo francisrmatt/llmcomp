@@ -15,16 +15,14 @@
 
 """Implements an Arithmetic Encoder and Decoder."""
 
-from typing import Any, Callable, Union
+from typing import Any, Callable
 
 import chex
 import numpy as np
 
 InputFn = Callable[[], int]
 OutputFn = Callable[[int], None]
-# foo | bar notation only supported in python 3.10 + 
-# but we are on 3.9
-IOFn = Union[InputFn , OutputFn]
+IOFn = InputFn | OutputFn
 
 
 def _log_power_of_b(n: int, base: int) -> int:

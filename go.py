@@ -5,18 +5,18 @@ import logging.config
 import matplotlib.pyplot as plt
 import numpy as np
 
-import config
+import constants
 import get_data
 import compressor
 
 def go_go():
 
-    logging.config.dictConfig(config.LOGGING_CONFIG)
+    logging.config.dictConfig(constants.LOGGING_CONFIG)
     logger = logging.getLogger()
     logger.info("Starting new run")
 
     n_chunks = 10
-    cw = 128
+    cw = 512
     filename = 0
     compressor_name = 'btransformer'
 
@@ -26,8 +26,6 @@ def go_go():
     # Compress data 
     rate, time = compressor.evaluate_compressor(compressor_name, data, None, n_chunks, cw)
     logger.info(f'Compressor ran with {rate=} and {time=}')
-
-
 
 
 if __name__ == '__main__':

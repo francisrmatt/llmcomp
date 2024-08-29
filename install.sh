@@ -1,4 +1,4 @@
-conda create -n llmcomp python=3.9
+conda create -n llmcomp python=3.10
 conda activate llmcomp
 
 # pip packages go here

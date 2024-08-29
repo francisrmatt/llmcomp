@@ -11,12 +11,12 @@ import gzip
 import random
 import logging.config
 
-import config
+import constants
 import language_model
 
 COMPRESS_FN_DICT = { #Mapping[str, Compressor] = {
     'gzip': functools.partial(gzip.compress, compresslevel=9),
-    'transformer': language_model.compress,
+    'btransformer': language_model.compress,
     'llama': language_model.compress,
 }
 
@@ -43,7 +43,7 @@ def evaluate_compressor(
   """
 
   # Logger
-  logging.config.dictConfig(config.LOGGING_CONFIG)
+  logging.config.dictConfig(constants.LOGGING_CONFIG)
   logger = logging.getLogger(__name__) 
 
   logger.info(f'Compressing {n_chunks=} with {compress_fn_name}')
