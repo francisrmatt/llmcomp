@@ -59,7 +59,7 @@ def evaluate_compressor(
       num_missed_bits += missed_bits
 
     t0 = time.perf_counter()
-    compressed_data = compress_fn(datum)
+    compressed_data = compress_fn(datum, compress_fn_name)
     t1 = time.perf_counter()
 
     running_time += t1 - t0

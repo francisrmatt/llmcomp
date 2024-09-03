@@ -1,5 +1,6 @@
 """Project wide default values"""
-
+from btransformer.transformer import TransformerConfig
+from llama.llama import LlamaConfig
 
 LOGGING_CONFIG = {
     'version' : 1,
@@ -37,6 +38,15 @@ LOGGING_CONFIG = {
         },
     }
 }
+TRANSFORMER_CONFIG = TransformerConfig(
+        vocab_size = 256,
+        embedding_dim = 128,
+        num_layers = 16,
+        emb_init_scale = 0.02,
+        widening_factor = 4,
+)
+
+LLAMA_CONFIG = LlamaConfig()
 
 COMPRESSOR = 'gzip'
 ALPHABET_SIZE = 256

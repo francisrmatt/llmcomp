@@ -4,6 +4,8 @@ from collections.abc import Iterator
 import functools
 from typing import Callable
 import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
 
 import haiku as hk
 import numpy as np
@@ -11,6 +13,8 @@ import numpy as np
 import arithmetic_coder
 import utils
 from btransformer import transformer
+
+import llama.llama
 
 import constants
 import logging.config
@@ -40,17 +44,21 @@ def _retrieve_predict_fn(
     params: hk.Params,
 ) -> Callable[[np.ndarray], np.ndarray]:
   """Returns the prediction function for the trained model."""
-  config = transformer.TransformerConfig(vocab_size=constants.ALPHABET_SIZE)
+  config = constants.TRANSFORMER_CONFIG
   model = hk.transform(
       functools.partial(transformer.transformer_decoder, config=config)
   )
   return lambda x: model.apply(params, None, x)
 
+def _get_llama():
+    return functools.partial(llama.llama.llama_completion_fn, settings = constants.LLAMA_CONFIG)
+
 
 def compress(
     data: bytes,
+    which_compressor : str,
     return_num_padded_bits: bool = False,
-    use_slow_lossless_compression: bool = False,
+    use_slow_lossless_compression: bool = True,
 ) -> bytes | tuple[bytes, int]:
   """Compresses the `data` using arithmetic coding and a pretrained model.
 
@@ -70,11 +78,25 @@ def compress(
   Returns:
     The compressed data.
   """
-  params = _retrieve_model_params()
-  predict_fn = _retrieve_predict_fn(params)
+  # Logger
+  logging.config.dictConfig(constants.LOGGING_CONFIG)
+  logger = logging.getLogger(__name__) 
+
+  if which_compressor == 'btransformer': 
+    params = _retrieve_model_params()
+    predict_fn = _retrieve_predict_fn(params)
+  elif which_compressor == 'llama':
+    predict_fn = _get_llama()
+  else:
+    logger.error('No valid compressor name, quitting')
+    sys.exit(-1)
+
 
   # Convert the `data` into an array of integers (representing the bytes).
   sequence_array = np.frombuffer(data, dtype=np.uint8)
+  #plt.figure()
+  #plt.plot(sequence_array)
+  #plt.savefig('foobar.png')
 
   if use_slow_lossless_compression:
     log_probs = list()
@@ -83,10 +105,44 @@ def compress(
           sequence_array[None, : subsequence_length + 1]
       )
       log_probs.append(subsequence_probs[0, -1])
+     
     log_probs = np.vstack(log_probs)
   else:
+    print('debug')
     log_probs = predict_fn(sequence_array[None])[0, ...]
+    print(f'{log_probs=}\n{log_probs.shape=}')
   probs = np.exp(log_probs)
+
+  print(f'log_probs size is {log_probs.shape}')
+
+
+  # Plotting
+  if which_compressor == 'llama':
+
+    # Don't remove this
+    probs = np.insert(probs,0,np.array([1/256]*256), axis = 0)
+    probs = probs[:-1]
+
+    plt.figure()
+    plt.gca().set_aspect(0.08)
+    A = probs
+    sns.heatmap(A.T, vmin = 0, vmax = 0.05)
+    plt.xlim(0, A.shape[0])
+    plt.ylim(0, A.shape[1])
+    dw = np.frombuffer(data, dtype = np.uint8)
+    plt.plot(dw)
+    plt.savefig('foo.png')
+  
+  if which_compressor == 'btransformer':
+    plt.figure()
+    plt.gca().set_aspect(0.1)
+    A = probs
+    sns.heatmap(A.T)
+    plt.xlim(0, A.shape[0])
+    plt.ylim(0, A.shape[1])
+    dw = np.frombuffer(data, dtype = np.uint8)
+    plt.plot(dw)
+    plt.savefig('foo.png')
 
   output = list()
   encoder = arithmetic_coder.Encoder(

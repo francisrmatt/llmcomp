@@ -39,9 +39,6 @@ def fetch(n_chunks: int,
         logger.info('Loading all data')
 
         n_files = len(next(os.walk('data/'))[2])
-        print("DEBUG")
-        print(n_files)
-
         data = np.fromfile('data/w0.data', np.int16)
         for i in range(1, n_files - 1):
             data = np.append(data, np.fromfile('data/w{}.data'.format(i), np.int16))
@@ -62,14 +59,14 @@ def fetch(n_chunks: int,
         patches = sliding_window_view(x, context_window)
         if len(patches[-1]) != context_window:
             patches.pop()
-
+        
         def our_norm(patch):
             maxx = max(patch)
             minx = min(patch)
             old_range = maxx - minx
             new_range = 255
 
-            patch = [(i - minx) * (new_range // old_range) for i in patch]
+            patch = [(i - minx) * new_range // old_range for i in patch]
             return bytes(patch)
 
         if normalisation:
