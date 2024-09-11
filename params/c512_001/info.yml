@@ -1,0 +1,11 @@
+model: btransformer
+cw: 512
+bs: 1
+lr: 1e-5
+vocab_size: 256
+embedding_dim: 256
+num_layers: 16
+num_heads: 32
+emb_init_scale: 0.02
+widening_factor: 4
+training: 2e5

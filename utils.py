@@ -17,7 +17,15 @@
 
 import chex
 import numpy as np
+import constants
 
+def our_norm(x):
+    maxx = max(x)
+    minx = min(x)
+    old_range = maxx - minx
+    new_range = constants.ALPHABET_SIZE - 1
+    x = [((v - minx) * new_range) // old_range for v in x]
+    return bytes(x)
 
 def bits_to_bytes(bits: str) -> tuple[bytes, int]:
   """Returns the bytes representation of bitstream and number of padded bits."""
@@ -96,7 +104,7 @@ def normalize_pdf_for_arithmetic_coding(pdf: chex.Array) -> chex.Array:
   Returns:
     The normalized probabilities.
   """
-  machine_epsilon = np.finfo(np.float32).eps
+  machine_epsilon = 10*(np.finfo(np.float32).eps)
   # Normalize the probabilities to avoid floating-point errors.
   pdf = pdf / np.cumsum(pdf)[-1]
   # Ensure all probabilities are sufficiently large to yield distinct cdfs.

@@ -1,9 +1,25 @@
-"""Trains a base transformer on the Enwik8 dataset."""
+# Copyright 2024 DeepMind Technologies Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ==============================================================================
+
+"""Trains a language model on the Enwik8 dataset."""
 
 import functools
 import random
-from typing import Any, Generator
+from typing import Any, Callable
 
+import logging
 import haiku as hk
 import jax
 import jax.numpy as jnp
@@ -11,11 +27,11 @@ import numpy as np
 import optax
 import tqdm
 import tree
-import logging.config
 
 import constants
 import get_data
 from btransformer import transformer
+import utils
 
 
 def _to_marginals(
@@ -96,8 +112,7 @@ def _update_parameters(
 
   return new_params, new_opt_state, log_dict
 
-
-def _retrieve_model_params() -> hk.Params:
+def _retrieve_model_params(which: str) -> hk.Params:
   """Returns the trained model parameters.
 
   Raises:
@@ -105,7 +120,7 @@ def _retrieve_model_params() -> hk.Params:
     the user should launch a training with train.py first.
   """
   try:
-    with np.load('params.npz', allow_pickle=True) as data:
+    with np.load(f'params/{which}/params.npz', allow_pickle=True) as data:
       return {key: data[key].item() for key in data.files}
   except FileNotFoundError as exc:
     raise FileNotFoundError(
@@ -114,60 +129,75 @@ def _retrieve_model_params() -> hk.Params:
     ) from exc
 
 def train_transformer_decoder(
-    data: Generator,
-    tconfig: transformer.TransformerConfig,
+    new_train: bool,
+    which : str,
+    config: transformer.TransformerConfig,
     training_steps: int,
+    cw: int,
     log_every: int,
-    learning_rate: float,
-    batch_size: int = 1,
+    batch_size: int = 128,
     use_tqdm: bool = True,
 ) -> tuple[hk.Params, float]:
-  """Trains a language model on data.
+  """Trains a language model on Enwik8 data.
+
+  Sequences of 2048 characters are extracted from Enwik8, and then randomly
+  sampled. We train a decoder-only transformer on batches, minimizing the
+  log-loss objective. The exact architecture can be modified using the
+  TransformerConfig object (defined in transformer.py)
 
   Args:
-    data: Generator of data to train on.
-    tconfig: TransformerConfig object which determines the hyperparameters of the base transformer.
-    training_steps: How many steps to train.
+    training_steps: Number of batches to train on.
     log_every: How often to log the loss. If negative or 0, no log at all.
-    learning_rate: Learning rate.
     batch_size: The number of sequences in a batch.
+    sequence_length: The length of the sequences to train on, in number of ASCII
+      characters.
     use_tqdm: Whether to use a progress bar or not.
 
   Returns:
     The final loss, and final parameters.
   """
-   # Logging config
   logging.config.dictConfig(constants.LOGGING_CONFIG)
   logger = logging.getLogger(__name__) 
 
   model = hk.transform(
-      functools.partial(transformer.transformer_decoder, config=tconfig)
+      functools.partial(transformer.transformer_decoder, config=config)
   )
 
-  # TODO 
-  logger.info(f'Training')
+  data_generator = get_data.fetch(
+      stream_mode = False,
+      amt = 0, # Doesn't matter
+      context_window = cw,
+      filename = -1, # all
+      scale = 1,
+      offset = 0,
+  )
 
-  dataset = list(data)
-  # Probably not needed
-  num_chunks = len(dataset)
-  context_window = len(dataset[0])
-  
+  dataset = list(data_generator)
+
   def fetch_random_batch() -> np.ndarray:
     batch_list = random.choices(dataset, k=batch_size)
     batch_list = [np.frombuffer(seq, dtype=np.uint8) for seq in batch_list]
+    if config.vocab_size == 128:
+      batch_list = np.right_shift(batch_list, 1)
     return np.array(batch_list, dtype=np.uint8)
 
-  # Initialize parameters.
-  dummy_batch = fetch_random_batch()
-  rng = jax.random.PRNGKey(0)
-  params = model.init(rng, dummy_batch)
+  if new_train:
+    logger.info('Fetching random batch for fresh run')
+    # Initialize parameters.
+    dummy_batch = fetch_random_batch()
+    rng = jax.random.PRNGKey(0)
+    params = model.init(rng, dummy_batch)
+  else:
+    logger.info('Fetching old parameters')
+    params = _retrieve_model_params(which)
+
 
   # Make gradient function.
   loss_fn = _make_loss_fn(model)
   grad_fn = jax.value_and_grad(loss_fn, has_aux=False)
 
   # Make optimizer, to apply the gradients.
-  optimizer = optax.adam(learning_rate=learning_rate)
+  optimizer = optax.adam(learning_rate=1e-4)
   opt_state = optimizer.init(params)
 
   logger.info('Initialization done, starting training...')
@@ -184,35 +214,13 @@ def train_transformer_decoder(
         optimizer=optimizer,
     )
     if log_every > 0 and step % log_every == 0:
-      logging.info(
+      logger.info(
           'Step %f, Loss %f, Grad norm %f',
           step,
           logs['loss'],
           logs['grad_norm_unclipped'],
       )
-      #logging.info(batch)
     last_loss = logs['loss']
 
   return params, last_loss
 
-
-def main(_) -> None:
-  """Trains a language model and saves the parameters to a JSON file."""
-
-  # Logging config
-  logging.config.dictConfig(constants.LOGGING_CONFIG)
-  logger = logging.getLogger(__name__) 
-
-  params, loss = train_transformer_decoder(
-      training_steps=5000,
-      log_every=100,
-      sequence_length=constants.CHUNK_SIZE_BYTES,
-  )
-  logger.info('Final loss: %f', loss)
-
-  np.savez('params.npz', **params)
-  logging.info('Parameters saved in file params.npz')
-
-
-if __name__ == '__main__':
-  main()

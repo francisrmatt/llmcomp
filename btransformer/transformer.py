@@ -16,11 +16,11 @@ class TransformerConfig:
   # Vocabulary size.
   vocab_size: int
   # The dimension of the first embedding.
-  embedding_dim: int = 128#128#64
+  embedding_dim: int = 256
   # The number of multi-head attention layers.
-  num_layers: int = 16#16#8#4
+  num_layers: int = 16
   # The number of heads per layer.
-  num_heads: int = 8
+  num_heads: int = 32
   # The parameter initialization scale for the embeddings.
   emb_init_scale: float = 0.02
   # How much larger the hidden layer of the feedforward network should be

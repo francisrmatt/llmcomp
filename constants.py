@@ -36,11 +36,23 @@ LOGGING_CONFIG = {
             'level' : 'INFO',
             'propagate' : False,
         },
+        'language_model' : {
+            'handlers' : ['console', 'file'],
+            'level' : 'INFO',
+            'propagate' : False,
+        },
+        # Add as needed
+        'btransformer.train' : {
+            'handlers' : ['console', 'file'],
+            'level' : 'INFO',
+            'propagate' : False,
+        },
     }
 }
 TRANSFORMER_CONFIG = TransformerConfig(
-        vocab_size = 256,
+        vocab_size = 128,
         embedding_dim = 128,
+        num_heads = 8,
         num_layers = 16,
         emb_init_scale = 0.02,
         widening_factor = 4,
@@ -48,5 +60,4 @@ TRANSFORMER_CONFIG = TransformerConfig(
 
 LLAMA_CONFIG = LlamaConfig()
 
-COMPRESSOR = 'gzip'
-ALPHABET_SIZE = 256
+CODER_PRECISION = 32

@@ -1,11 +1,12 @@
 """Implements a lossless compressor with language models (arithmetic coding)."""
-
+from scipy.special import softmax
 from collections.abc import Iterator
 import functools
 from typing import Callable
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import math
 
 import haiku as hk
 import numpy as np
@@ -21,9 +22,11 @@ import logging.config
 
 import sys
 import audioop
+import yaml
 
 
-def _retrieve_model_params() -> hk.Params:
+
+def _retrieve_model_params(which_model) -> hk.Params:
   """Returns the trained model parameters.
 
   Raises:
@@ -31,7 +34,7 @@ def _retrieve_model_params() -> hk.Params:
     the user should launch a training with train.py first.
   """
   try:
-    with np.load('btransformer/params.npz', allow_pickle=True) as data:
+    with np.load(f'params/{which_model}/params.npz', allow_pickle=True) as data:
       return {key: data[key].item() for key in data.files}
   except FileNotFoundError as exc:
     raise FileNotFoundError(
@@ -42,23 +45,167 @@ def _retrieve_model_params() -> hk.Params:
 
 def _retrieve_predict_fn(
     params: hk.Params,
+    config,
 ) -> Callable[[np.ndarray], np.ndarray]:
   """Returns the prediction function for the trained model."""
-  config = constants.TRANSFORMER_CONFIG
+  #config = constants.TRANSFORMER_CONFIG
   model = hk.transform(
       functools.partial(transformer.transformer_decoder, config=config)
   )
   return lambda x: model.apply(params, None, x)
 
+# Needs to be replaced with its own thing TODO
 def _get_llama():
     return functools.partial(llama.llama.llama_completion_fn, settings = constants.LLAMA_CONFIG)
 
+def compress_smooth(
+    data: bytes,
+    which_model,
+    config,
+    return_num_padded_bits: bool = True,
+) -> bytes | tuple[bytes, int]:
+  """Compresses the `data` using arithmetic coding and a pretrained model. 
+  But with slow compression and a moving context window, must be slow and lossless
+
+  Args:
+    data: The data to be compressed.
+    return_num_padded_bits: Whether to return the number of zeros added to the
+      encoded bitstream in order to make it byte-decodeable (i.e., divisible by
+      8). Usually, this is used when the encoded data has to be decoded again.
+
+  Returns:
+    The compressed data.
+  """
+  # Logger
+  logging.config.dictConfig(constants.LOGGING_CONFIG)
+  logger = logging.getLogger(__name__) 
+  logger.info('Initialising smooth compression')
+  logger.info(f'Length of data is: {len(data)}')
+
+  params = _retrieve_model_params(which_model)
+  predict_fn = _retrieve_predict_fn(params, config)
+
+  # Info about model:
+  with open(f'params/{which_model}/info.yml', 'r') as f:
+    info = yaml.safe_load(f)
+
+  bits_per_symbol = math.log2(info['vocab_size'])
+
+  # This needs to be replaced
+  #predict_fn = _get_llama()
+
+  sequence_array = np.frombuffer(data, dtype=np.uint8)
+  #sequence_array = np.array(list(data))
+  #sequence_array = np.right_shift(sequence_array, 1)
+
+  # Why was the graph weird
+  plt.figure()
+  plt.plot(sequence_array)
+  plt.savefig('figs/tmp/incoming_to_smooth_compressor.png')
+  plt.close()
+
+  output = list()
+
+  encoder = arithmetic_coder.Encoder(
+      base=2,
+      precision=constants.CODER_PRECISION,
+      output_fn=output.append,
+  )
+  
+  from collections import deque
+  pdf_q = deque(maxlen = 32)
+  sequence_q = deque(maxlen = 32)
+  crps_q = []
+  prev_len = 0
+
+  total_b = 0
+  compressed_b = 0
+  for offset in range(len(sequence_array)):
+
+    subsequence_probs = predict_fn(
+        sequence_array[None, max(0, offset - info['cw']): offset + 1] 
+    )
+
+    # Update post-hoc statistics
+
+    symbol = sequence_array[offset]
+    probs = np.exp(subsequence_probs[0, -1])
+    nprobs = utils.normalize_pdf_for_arithmetic_coding(probs)
+
+    pdf_q.append(nprobs)
+    sequence_q.append(symbol)
+    encoder.encode(nprobs, symbol)
+
+    # Here calculate and graph the CRPS
+    cdf = np.cumsum(nprobs)
+    cdf2 = [x**2 if i < symbol else 1-(1-x)**2 for i, x in enumerate(cdf)]
+    indicator = np.array([0 if idx < symbol else 1 for idx in range(len(cdf))])
+    crps = np.sum((cdf-indicator)**2)
+    crps_q.append(crps)
+    fig, ax = plt.subplots()
+    plt.plot(cdf2, label = 'CDF Square Adjustment')
+    plt.plot(cdf, label = 'CDF')
+    plt.plot(indicator, label = 'Correct symbol')
+    ax.fill_between(np.arange(0,info['vocab_size']), np.maximum(cdf2, indicator), np.minimum(cdf2, indicator), color="crimson", alpha=0.4)
+    plt.text(0.1, 0.5, f'CRPS = {crps:.02f}')
+    plt.legend()
+    plt.title('CRPS Graph')
+    plt.xlabel('Symbol value')
+    plt.ylabel('Density')
+    plt.savefig('figs/tmp/crps_smooth.png')
+    plt.close()
+
+    compressed_bits = ''.join(map(str, output))
+    n_bits = len(compressed_bits) - prev_len
+
+    total_b += bits_per_symbol
+    compressed_b += n_bits
+
+    coder_rep = str(compressed_bits[-n_bits:]) if n_bits != 0 else '_'
+    logger.info(f'Encoded {offset}th byte ({symbol}) as {coder_rep} : {n_bits} bits @ {nprobs[symbol]*100}%')
+    logger.info(f'Running compression is {compressed_b/total_b*100}%, CRPS: {np.mean(crps_q)}')
+    prev_len = len(compressed_bits)
+  
+    # Heatmap
+    plt.figure()
+    plt.gca().set_aspect(0.2)
+    A = np.array(list(pdf_q))
+    sns.heatmap(A.T)
+    plt.xlim(0, A.shape[0])
+    plt.ylim(0, A.shape[1])
+    plt.plot(list(sequence_q))
+    plt.savefig('figs/tmp/smooth_heatmap.png')
+    plt.close()
+
+    # Distribution
+    plt.figure()
+    plt.plot(nprobs)
+    plt.axvline(symbol, ymin = 0, ymax = nprobs[symbol]/max(nprobs),color = 'r')
+    plt.savefig('figs/tmp/smooth_choice_graph.png')
+    plt.close()
+
+
+  encoder.terminate()
+  compressed_bits = ''.join(map(str, output))
+  logger.info(f'Terminated, adding {len(compressed_bits)-prev_len} bits')
+
+  compressed_bytes, num_padded_bits = utils.bits_to_bytes(compressed_bits)
+
+  logger.info(f'Savings bytes with {num_padded_bits} padded bits')
+  with open('compressed_bytes.data', 'wb') as f:
+    f.write(compressed_bytes)
+
+  if return_num_padded_bits:
+    return compressed_bytes, num_padded_bits
+
+  return compressed_bytes
 
 def compress(
     data: bytes,
-    which_compressor : str,
-    return_num_padded_bits: bool = False,
-    use_slow_lossless_compression: bool = True,
+    which_model: str,
+    config,
+    return_num_padded_bits: bool = True,
+    use_slow_lossless_compression: bool = False,
 ) -> bytes | tuple[bytes, int]:
   """Compresses the `data` using arithmetic coding and a pretrained model.
 
@@ -78,25 +225,19 @@ def compress(
   Returns:
     The compressed data.
   """
-  # Logger
   logging.config.dictConfig(constants.LOGGING_CONFIG)
   logger = logging.getLogger(__name__) 
+  logger.info('Initialising btransformer compression')
+  logger.info(f'Length of data is: {len(data)}')
 
-  if which_compressor == 'btransformer': 
-    params = _retrieve_model_params()
-    predict_fn = _retrieve_predict_fn(params)
-  elif which_compressor == 'llama':
-    predict_fn = _get_llama()
-  else:
-    logger.error('No valid compressor name, quitting')
-    sys.exit(-1)
-
+  params = _retrieve_model_params(which_model)
+  predict_fn = _retrieve_predict_fn(params, config)
 
   # Convert the `data` into an array of integers (representing the bytes).
   sequence_array = np.frombuffer(data, dtype=np.uint8)
-  #plt.figure()
-  #plt.plot(sequence_array)
-  #plt.savefig('foobar.png')
+  plt.figure()
+  plt.plot(sequence_array)
+  plt.savefig('figs/tmp/incoming_to_compressor.png')
 
   if use_slow_lossless_compression:
     log_probs = list()
@@ -108,49 +249,45 @@ def compress(
      
     log_probs = np.vstack(log_probs)
   else:
-    print('debug')
     log_probs = predict_fn(sequence_array[None])[0, ...]
-    print(f'{log_probs=}\n{log_probs.shape=}')
   probs = np.exp(log_probs)
 
-  print(f'log_probs size is {log_probs.shape}')
-
-
   # Plotting
-  if which_compressor == 'llama':
+  #if which_compressor == 'llama':
 
-    # Don't remove this
-    probs = np.insert(probs,0,np.array([1/256]*256), axis = 0)
-    probs = probs[:-1]
+  #  # Don't remove this
+  #  probs = np.insert(probs,0,np.array([1/256]*256), axis = 0)
+  #  probs = probs[:-1]
 
-    plt.figure()
-    plt.gca().set_aspect(0.08)
-    A = probs
-    sns.heatmap(A.T, vmin = 0, vmax = 0.05)
-    plt.xlim(0, A.shape[0])
-    plt.ylim(0, A.shape[1])
-    dw = np.frombuffer(data, dtype = np.uint8)
-    plt.plot(dw)
-    plt.savefig('foo.png')
+  #  plt.figure()
+  #  plt.gca().set_aspect(0.08)
+  #  A = probs
+  #  sns.heatmap(A.T, vmin = 0, vmax = 0.05)
+  #  plt.xlim(0, A.shape[0])
+  #  plt.ylim(0, A.shape[1])
+  #  dw = np.frombuffer(data, dtype = np.uint8)
+  #  plt.plot(dw)
+  #  plt.savefig('foo.png')
   
-  if which_compressor == 'btransformer':
-    plt.figure()
-    plt.gca().set_aspect(0.1)
-    A = probs
-    sns.heatmap(A.T)
-    plt.xlim(0, A.shape[0])
-    plt.ylim(0, A.shape[1])
-    dw = np.frombuffer(data, dtype = np.uint8)
-    plt.plot(dw)
-    plt.savefig('foo.png')
+  #if which_compressor == 'btransformer':
+  plt.figure()
+  plt.gca().set_aspect(0.1)
+  A = probs
+  sns.heatmap(A.T)
+  plt.xlim(0, A.shape[0])
+  plt.ylim(0, A.shape[1])
+  dw = np.frombuffer(data, dtype = np.uint8)
+  plt.plot(dw)
+  plt.savefig('figs/tmp/non_smooth_heatmap.png')
 
   output = list()
   encoder = arithmetic_coder.Encoder(
       base=2,
-      precision=32,
+      precision=constants.CODER_PRECISION,
       output_fn=output.append,
   )
 
+  idx = 0
   for pdf, symbol in zip(probs, sequence_array):
     encoder.encode(utils.normalize_pdf_for_arithmetic_coding(pdf), symbol)
 
@@ -159,20 +296,19 @@ def compress(
   compressed_bits = ''.join(map(str, output))
   compressed_bytes, num_padded_bits = utils.bits_to_bytes(compressed_bits)
 
+  
+
   if return_num_padded_bits:
     return compressed_bytes, num_padded_bits
 
   return compressed_bytes
 
-
-# Ignore decompress for now
-"""
 def decompress(
     data: bytes,
     num_padded_bits: int = 0,
-    uncompressed_length: int = constants.CHUNK_SIZE_BYTES,
+    uncompressed_length: int = 256,
 ) -> bytes:
-  ""Decompresses the `data` using arithmetic coding and a pretrained model.
+  """Decompresses the `data` using arithmetic coding and a pretrained model.
 
   See https://en.wikipedia.org/wiki/Arithmetic_coding for details.
 
@@ -184,7 +320,13 @@ def decompress(
 
   Returns:
     The decompressed data.
-  ""
+  """
+
+  # Logger
+  logging.config.dictConfig(constants.LOGGING_CONFIG)
+  logger = logging.getLogger(__name__) 
+  logger.info('Decompressing')
+
   params = _retrieve_model_params()
   predict_fn = _retrieve_predict_fn(params)
 
@@ -199,8 +341,8 @@ def decompress(
       return None
 
   decoder = arithmetic_coder.Decoder(
-      base=constants.ARITHMETIC_CODER_BASE,
-      precision=constants.ARITHMETIC_CODER_PRECISION,
+      base=2,
+      precision=constants.CODER_PRECISION,
       input_fn=_input_fn,
   )
   # We need a dummy token because the language model right-shifts the sequence
@@ -212,12 +354,17 @@ def decompress(
   probs = np.exp(predict_fn(sequence_array[None])[0, ...])
 
   for idx in range(uncompressed_length):
+    logger.info(f'Sequence array fed in is {sequence_array}')
     token = decoder.decode(
         utils.normalize_pdf_for_arithmetic_coding(probs[idx])
     )
+    logger.info(f'Decompressing {idx}th token, got {token}')
     sequence_array = np.insert(sequence_array, -1, token)
+    plt.figure()
+    plt.plot(sequence_array)
+    plt.savefig('figs/tmp/decom_output_live.png')
+    plt.close()
     probs = np.exp(predict_fn(sequence_array[None])[0, ...])
 
   # Remove the dummy token and convert to bytes.
   return sequence_array[:-1].tobytes()
-"""

@@ -1,6 +1,6 @@
 """Main data fetcher"""
 
-from typing import Generator
+from typing import Generator, Callable
 import numpy as np
 import audioop
 import logging.config
@@ -12,15 +12,18 @@ import constants
 import matplotlib.pyplot as plt
 
 
-def fetch(n_chunks: int, 
-          context_window: int, 
+def fetch(stream_mode : bool,
+          amt : int, # number of chunks for non stream and length of stream for stream
+          context_window: int, # needed for non stream
           filename: int, 
-          normalisation: bool = True,
+          scale: float = 1,
+          offset: int = 0,
+          map_fn: Callable = None,
           ) -> Generator[any, any, any]:
     """Returns chunks of float data which are fetched from wifi data
 
     Args:
-        n_chunks: Number of chunks to fetch.
+        n_chunks: Number of chunks to fetch. If -1 works in stream mode and assumes test data
         context_window: How large each context window is.
         filename: Integer describing which file to fetch from, if -1, will ignore and start from 0 and go until n_chunks limit is reached.
         normalisation: Default True, will transform the data so the maximum value is 255 and the minimum value is 0.
@@ -31,24 +34,39 @@ def fetch(n_chunks: int,
     logger = logging.getLogger(__name__) 
 
     # All file names should be in the format data/wX.data where X is an integer.
-    file_str = 'all' if filename == -1 else str(filename)
-    logger.info(f'Fetching {n_chunks} of size {context_window} from file {file_str} with {normalisation=}')
+    if stream_mode:
+        logger.info(f'Fetching data in stream mode with stream length {amt}')
+        context_window = amt
+        n_chunks = 1
+        
+    else:
+        # TODO this is wrong if we do all
+        logger.info(f'Fetching data in chunk mode with {"all" if filename == -1 else amt} chunks each size {context_window}')
+        n_chunks = amt
 
     # Load in data 
-    if filename == -1:
+    if filename == -1: # TODO as we need to consider pre-processed data
+        n_chunks = 2e11
         logger.info('Loading all data')
-
         n_files = len(next(os.walk('data/'))[2])
-        data = np.fromfile('data/w0.data', np.int16)
+        data = np.fromfile('data/raw_data/w0.data', np.int16)
         for i in range(1, n_files - 1):
             data = np.append(data, np.fromfile('data/w{}.data'.format(i), np.int16))
-
+    elif filename == -2: # Test file is -2
+        logger.info(f'Loading test file with offset {offset}')
+        data = np.fromfile('data/test/w_test.data', np.int16)
+        logger.info(f'Ofsetting by {offset}')
+        data = data[offset:]
     else:
-        logger.info('Loading from file {}'.format(filename))
-        data = np.fromfile('data/w{}.data'.format(filename), np.int16)
+        logger.info(f'Loading from file {filename} with offset {offset}')
+        data = np.fromfile('data/raw_data/w{}.data'.format(filename), np.int16)
+        data = data[offset:]
+
 
     data_iq = data[0::2] + 1j*data[1::2]
-    signal_real = np.real(data_iq).copy().astype(np.int16)
+    if scale != 1.0:
+        logger.info(f'Scaling by factor {scale}')
+    signal_real = (scale*np.real(data_iq).copy()).astype(np.int16) # Add a scaling factor?
     signal_real = signal_real.tobytes()
 
     new_signal = audioop.lin2lin(signal_real, 2, 1)
@@ -59,18 +77,9 @@ def fetch(n_chunks: int,
         patches = sliding_window_view(x, context_window)
         if len(patches[-1]) != context_window:
             patches.pop()
-        
-        def our_norm(patch):
-            maxx = max(patch)
-            minx = min(patch)
-            old_range = maxx - minx
-            new_range = 255
 
-            patch = [(i - minx) * new_range // old_range for i in patch]
-            return bytes(patch)
-
-        if normalisation:
-            return map(our_norm, patches)
+        if map_fn is not None:
+            return map(map_fn, patches)
 
         return map(lambda patch: patch.tobytes(), patches)
 
