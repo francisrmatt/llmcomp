@@ -19,6 +19,7 @@ def fetch(stream_mode : bool,
           scale: float = 1,
           offset: int = 0,
           map_fn: Callable = None,
+          rchunks : bool = False,
           ) -> Generator[any, any, any]:
     """Returns chunks of float data which are fetched from wifi data
 
@@ -35,37 +36,38 @@ def fetch(stream_mode : bool,
 
     # All file names should be in the format data/wX.data where X is an integer.
     if stream_mode:
-        logger.info(f'Fetching data in stream mode with stream length {amt}')
+        logger.debug(f'Fetching data in stream mode with stream length {amt}')
         context_window = amt
         n_chunks = 1
         
     else:
         # TODO this is wrong if we do all
-        logger.info(f'Fetching data in chunk mode with {"all" if filename == -1 else amt} chunks each size {context_window}')
+        logger.debug(f'Fetching data in chunk mode with {"all" if filename == -1 else amt} chunks each size {context_window}')
         n_chunks = amt
 
     # Load in data 
     if filename == -1: # TODO as we need to consider pre-processed data
         n_chunks = 2e11
-        logger.info('Loading all data')
-        n_files = len(next(os.walk('data/'))[2])
+        logger.debug('Loading all data')
+        n_files = len(next(os.walk('data/raw_data'))[2])
+        print(f'{n_files=}')
         data = np.fromfile('data/raw_data/w0.data', np.int16)
         for i in range(1, n_files - 1):
-            data = np.append(data, np.fromfile('data/w{}.data'.format(i), np.int16))
+            data = np.append(data, np.fromfile('data/raw_data/w{}.data'.format(i), np.int16))
     elif filename == -2: # Test file is -2
-        logger.info(f'Loading test file with offset {offset}')
+        logger.debug(f'Loading test file with offset {offset}')
         data = np.fromfile('data/test/w_test.data', np.int16)
-        logger.info(f'Ofsetting by {offset}')
+        logger.debug(f'Ofsetting by {offset}')
         data = data[offset:]
     else:
-        logger.info(f'Loading from file {filename} with offset {offset}')
+        logger.debug(f'Loading from file {filename} with offset {offset}')
         data = np.fromfile('data/raw_data/w{}.data'.format(filename), np.int16)
         data = data[offset:]
 
 
     data_iq = data[0::2] + 1j*data[1::2]
     if scale != 1.0:
-        logger.info(f'Scaling by factor {scale}')
+        logger.debug(f'Scaling by factor {scale}')
     signal_real = (scale*np.real(data_iq).copy()).astype(np.int16) # Add a scaling factor?
     signal_real = signal_real.tobytes()
 
@@ -74,7 +76,16 @@ def fetch(stream_mode : bool,
 
     def _extract_rf_slide(sample: bytes):
         x = np.frombuffer(sample, dtype = np.uint8)
-        patches = sliding_window_view(x, context_window)
+        if rchunks:
+            patches = np.array_split(x,
+                range(
+                    context_window,
+                    len(sample),
+                    context_window,))
+
+        else:
+            patches = sliding_window_view(x, context_window)
+
         if len(patches[-1]) != context_window:
             patches.pop()
 

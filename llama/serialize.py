@@ -115,7 +115,6 @@ def serialize_arr(arr, settings: SerializerSettings):
     Returns:
     - str: String representation of the array.
     """
-    print(f'{arr=}')
     # max_val is only for fixing the number of bits in nunm2repr so it can be vmapped
     assert np.all(np.abs(arr[~np.isnan(arr)]) <= settings.max_val), f"abs(arr) must be <= max_val,\
          but abs(arr)={np.abs(arr)}, max_val={settings.max_val}"
@@ -132,9 +131,9 @@ def serialize_arr(arr, settings: SerializerSettings):
     ismissing = np.isnan(arr)
     
     def tokenize(arr):
-        #return ''.join([settings.bit_sep+str(b) for b in arr])
-        foo = ''.join([settings.bit_sep+('{:x}'.format(b)) for b in arr])
-        return f'{int(foo):x}'
+        return ''.join([settings.bit_sep+str(b) for b in arr])
+        #foo = ''.join([settings.bit_sep+('{:x}'.format(b)) for b in arr])
+        #return f'{int(foo):x}'
     
     bit_strs = []
     for sign, digits,missing in zip(sign_arr, digits_arr, ismissing):
@@ -174,67 +173,65 @@ def deserialize_str(bit_str, settings: SerializerSettings, ignore_last=False, st
     - np.array: Array of numbers corresponding to the string.
     """
     # TEMPORARILY OVERWRITE
-    settings=SerializerSettings(base=16, prec=0, signed=True, half_bin_correction=False, time_sep=',', bit_sep = '', max_val = 255) # added max val for now
+    #settings=SerializerSettings(base=16, prec=0, signed=True, half_bin_correction=False, time_sep=',', bit_sep = '', max_val = 255) # added max val for now
 
     # ignore_last is for ignoring the last time step in the prediction, which is often a partially generated due to token limit
     orig_bitstring = bit_str
     bit_strs = bit_str.split(settings.time_sep)
     # remove empty strings
     bit_strs = [a for a in bit_strs if len(a) > 0]
-    print(f'{bit_strs=}')
-    conv_array = np.array([int(x, 16) for x in bit_strs])
-    print(f'{conv_array=}')
-    return conv_array
+    #print(f'{bit_strs=}')
+    #conv_array = np.array([int(x, 16) for x in bit_strs])
+    #print(f'{conv_array=}')
+    #return conv_array
 
-    #if ignore_last:
-    #    bit_strs = bit_strs[:-1]
-    #if steps is not None:
-    #    bit_strs = bit_strs[:steps]
-    #vrepr2num = partial(vec_repr2num,base=settings.base,prec=settings.prec,half_bin_correction=settings.half_bin_correction)
-    #max_bit_pos = int(np.ceil(np.log(settings.max_val)/np.log(settings.base)).item())
-    #sign_arr = []
-    #digits_arr = []
-    #try:
-    #    for i, bit_str in enumerate(bit_strs):
-    #        if bit_str.startswith(settings.minus_sign):
-    #            sign = -1
-    #        elif bit_str.startswith(settings.plus_sign):
-    #            sign = 1
-    #        else:
-    #            assert settings.signed == False, f"signed bit_str must start with {settings.minus_sign} or {settings.plus_sign}"
-    #        bit_str = bit_str[len(settings.plus_sign):] if sign==1 else bit_str[len(settings.minus_sign):]
-    #        if settings.bit_sep=='':
-    #            bits = [b for b in bit_str.lstrip()]
-    #        else:
-    #            bits = [b[:1] for b in bit_str.lstrip().split(settings.bit_sep)]
-    #        if settings.fixed_length:
-    #            assert len(bits) == max_bit_pos+settings.prec, f"fixed length bit_str must have {max_bit_pos+settings.prec} bits, but has {len(bits)}: '{bit_str}'"
-    #        digits = []
-    #        for b in bits:
-    #            if b==settings.decimal_point:
-    #                continue
-    #            # check if is a digit
-    #            if b.isdigit():
-    #                digits.append(int(b))
-    #            else:
-    #                break
-    #        #digits = [int(b) for b in bits]
-    #        sign_arr.append(sign)
-    #        digits_arr.append(digits)
-    #except Exception as e:
-    #    print(f"Error deserializing {settings.time_sep.join(bit_strs[i-2:i+5])}{settings.time_sep}\n\t{e}")
-    #    print(f'Got {orig_bitstring}')
-    #    print(f"Bitstr {bit_str}, separator {settings.bit_sep}")
-    #    # At this point, we have already deserialized some of the bit_strs, so we return those below
-    #if digits_arr:
-    #    # add leading zeros to get to equal lengths
-    #    max_len = max([len(d) for d in digits_arr])
-    #    print(f'{digits_arr=}')
-    #    for i in range(len(digits_arr)):
-    #        digits_arr[i] = [0]*(max_len-len(digits_arr[i])) + digits_arr[i]
-    #    foo = vrepr2num(np.array(sign_arr), np.array(digits_arr))
-    #    print(f'{foo=}')
-    #    return foo
-    #else:
-    #    # errored at first step
-    #    return None
+    if ignore_last:
+        bit_strs = bit_strs[:-1]
+    if steps is not None:
+        bit_strs = bit_strs[:steps]
+    vrepr2num = partial(vec_repr2num,base=settings.base,prec=settings.prec,half_bin_correction=settings.half_bin_correction)
+    max_bit_pos = int(np.ceil(np.log(settings.max_val)/np.log(settings.base)).item())
+    sign_arr = []
+    digits_arr = []
+    try:
+        for i, bit_str in enumerate(bit_strs):
+            if bit_str.startswith(settings.minus_sign):
+                sign = -1
+            elif bit_str.startswith(settings.plus_sign):
+                sign = 1
+            else:
+                assert settings.signed == False, f"signed bit_str must start with {settings.minus_sign} or {settings.plus_sign}"
+            bit_str = bit_str[len(settings.plus_sign):] if sign==1 else bit_str[len(settings.minus_sign):]
+            if settings.bit_sep=='':
+                bits = [b for b in bit_str.lstrip()]
+            else:
+                bits = [b[:1] for b in bit_str.lstrip().split(settings.bit_sep)]
+            if settings.fixed_length:
+                assert len(bits) == max_bit_pos+settings.prec, f"fixed length bit_str must have {max_bit_pos+settings.prec} bits, but has {len(bits)}: '{bit_str}'"
+            digits = []
+            for b in bits:
+                if b==settings.decimal_point:
+                    continue
+                # check if is a digit
+                if b.isdigit():
+                    digits.append(int(b))
+                else:
+                    break
+            #digits = [int(b) for b in bits]
+            sign_arr.append(sign)
+            digits_arr.append(digits)
+    except Exception as e:
+        print(f"Error deserializing {settings.time_sep.join(bit_strs[i-2:i+5])}{settings.time_sep}\n\t{e}")
+        print(f'Got {orig_bitstring}')
+        print(f"Bitstr {bit_str}, separator {settings.bit_sep}")
+        # At this point, we have already deserialized some of the bit_strs, so we return those below
+    if digits_arr:
+        # add leading zeros to get to equal lengths
+        max_len = max([len(d) for d in digits_arr])
+        for i in range(len(digits_arr)):
+            digits_arr[i] = [0]*(max_len-len(digits_arr[i])) + digits_arr[i]
+        foo = vrepr2num(np.array(sign_arr), np.array(digits_arr))
+        return foo
+    else:
+        # errored at first step
+        return None

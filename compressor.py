@@ -16,11 +16,13 @@ import language_model
 import constants
 import logging.config
 
+import llama.compress
+
 COMPRESS_FN_DICT = { #Mapping[str, Compressor] = {
     'gzip': functools.partial(gzip.compress, compresslevel=9),
     'btransformer': language_model.compress,
     'btransformer_smooth': language_model.compress_smooth,
-    'llama': language_model.compress,
+    'llama': llama.compress.fo_compress,
 }
 #def evaluate_smooth_compressor(
 #    compress_fn_name: str,
@@ -121,12 +123,13 @@ def evaluate_compressor(
 
   len_data = 0
   len_datum = 0
+  kld_sum = 0
   for i, datum in enumerate(data):
     # Get stats for context_l and n_chunks
     len_data += 1
     len_datum = len(datum)
 
-    logger.info(f'Compressing {i}th batch')
+    logger.debug(f'Compressing {i}th batch')
     if mask_fn is not None:
       datum, missed_bits = mask_fn(datum)
       num_missed_bits += missed_bits
@@ -140,16 +143,19 @@ def evaluate_compressor(
       compressed_data = compress_fn(datum)
       pad = 0
     else:
-      compressed_data, pad = compress_fn(datum, params, config)
+      compressed_data, pad, kld = compress_fn(datum, params, config)
+      kld_sum += kld
     t1 = time.perf_counter()
-    logger.info(f'Returned {len(compressed_data)} bytes')
-    logger.info(f'Required {pad} padding bits')
+    logger.debug(f'Returned {len(compressed_data)} bytes')
+    logger.debug(f'Required {pad} padding bits')
 
     running_time += t1 - t0
     raw_length += len(datum)
     compressed_length += len(compressed_data)
 
   fc = len_datum * len_data
+  kld = kld_sum/i
+  logger.info(f'Average KLD was {kld}')
   # Since language models are trained on ASCII strings, they cannot handle all
   # byte values. Thus, we mask the data to be ASCII-decodable by zeroing
   # `num_missed_bits` of the most significant bits. However, this means that we

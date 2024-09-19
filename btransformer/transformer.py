@@ -1,4 +1,7 @@
 """Transformer model."""
+import matplotlib.pyplot as plt
+import seaborn as sns
+import sys
 
 import dataclasses
 
@@ -7,6 +10,105 @@ import jax
 import jax.nn as jnn
 import jax.numpy as jnp
 import numpy as np
+
+
+def graph3d(embeddings):
+  from mpl_toolkits.mplot3d import Axes3D
+  from scipy.spatial import cKDTree
+  from sklearn.decomposition import PCA
+
+  # Step 1: Generate the sphere
+  def generate_sphere(n_points=1000):
+      u = np.linspace(0, 2 * np.pi, n_points)
+      v = np.linspace(0, np.pi, n_points)
+      u, v = np.meshgrid(u, v)
+      x = np.sin(v) * np.cos(u)
+      y = np.sin(v) * np.sin(u)
+      z = np.cos(v)
+      return x, y, z
+
+  # Step 2: Compute distances
+  def compute_closest_points(sphere_points, data_points):
+      # Create a KDTree for fast nearest neighbor search
+      tree = cKDTree(data_points)
+      distances, indices = tree.query(sphere_points)
+      return indices
+
+  data_points = PCA(n_components=3).fit_transform(embeddings)
+
+  # Generate sphere points
+  n_points = 50
+  x, y, z = generate_sphere(n_points)
+
+  # Reshape sphere points into a list of points
+  sphere_points = np.stack([x.ravel(), y.ravel(), z.ravel()], axis=-1)
+
+  # Compute closest points on the sphere
+  closest_indices = compute_closest_points(sphere_points, data_points)
+
+  # Reshape closest_indices to match the shape of x, y, z
+  closest_indices = closest_indices.reshape(x.shape)
+
+  # Normalize the color index to be in the range [0, 1] for colormap
+  norm = plt.Normalize(0, len(data_points) - 1)
+  cmap = plt.get_cmap('rocket')
+
+  # Create a color array for the surface plot
+  colors = cmap(norm(closest_indices.ravel())).reshape(x.shape + (4,))  # RGBA
+  def update_view(azim):
+    ax.cla()  # Clear the previous plot
+    ax.plot_surface(x, y, z, facecolors=colors, rstride=1, cstride=1, linewidth=0, antialiased=False, shade=False)
+    ax.set_axis_off()
+    
+    # Set equal scaling
+    max_range = np.array([x.max()-x.min(), y.max()-y.min(), z.max()-z.min()]).max()
+    mid_x = (x.max() + x.min()) * 0.5
+    mid_y = (y.max() + y.min()) * 0.5
+    mid_z = (z.max() + z.min()) * 0.5
+    ax.set_xlim([mid_x - max_range, mid_x + max_range])
+    ax.set_ylim([mid_y - max_range, mid_y + max_range])
+    ax.set_zlim([mid_z - max_range, mid_z + max_range])
+    
+    # Set aspect ratio
+    ax.set_box_aspect([1, 1, 1])  # Aspect ratio is 1:1:1
+    ax.view_init(elev=30, azim=azim)
+
+  # Plot the sphere
+  fig = plt.figure(figsize=(10, 8))  # Increase figure size (width, height)
+  ax = fig.add_subplot(111, projection='3d')
+  # Create animation
+  import matplotlib.animation as animation
+  from matplotlib.animation import PillowWriter
+  frames = 360
+  interval = 50  # milliseconds between frames
+  anim = animation.FuncAnimation(fig, update_view, frames=np.linspace(0, 360, frames), interval=interval, repeat=True)
+
+  # Save the animation as a GIF
+  anim.save('figs/tmp/rotating_sphere.gif', writer=PillowWriter(fps=24), dpi=150)
+
+  # Plot the sphere surface with colors based on closest point index
+  #surface = ax.plot_surface(x, y, z, facecolors=colors, rstride=1, cstride=1, linewidth=0, antialiased=False, shade=False)
+
+  ## Remove axes
+  #ax.set_axis_off()
+
+  ## Set equal scaling
+  #max_range = np.array([x.max()-x.min(), y.max()-y.min(), z.max()-z.min()]).max()
+  #mid_x = (x.max() + x.min()) * 0.5
+  #mid_y = (y.max() + y.min()) * 0.5
+  #mid_z = (z.max() + z.min()) * 0.5
+  #ax.set_xlim([mid_x - max_range, mid_x + max_range])
+  #ax.set_ylim([mid_y - max_range, mid_y + max_range])
+  #ax.set_zlim([mid_z - max_range, mid_z + max_range])
+
+  ## Set aspect ratio
+  #ax.set_box_aspect([1, 1, 1])  # Aspect ratio is 1:1:1
+
+  ## Change angle
+  #ax.view_init(elev=30, azim=50)
+
+  ## Save the figure with higher DPI
+  #plt.savefig('figs/tmp/sphere_plot.png', dpi=300, bbox_inches='tight')
 
 
 @dataclasses.dataclass(kw_only=True)
@@ -57,6 +159,14 @@ class MultiHeadDotProductAttention(hk.Module):
     """Returns the output of the multi-head attention."""
     batch_size, sequence_length, embedding_size = inputs_q.shape
 
+    #plt.figure()
+    #sns.heatmap(inputs_q[1,:,:].T)
+    #plt.xlim(0, inputs_q.shape[1])
+    #plt.ylim(0, inputs_q.shape[2])
+    #plt.savefig('figs/tmp/attention_head_input.png')
+    #plt.close()
+
+
     num_hiddens = self._num_hiddens_per_head * self._num_heads
     q = hk.Linear(num_hiddens, with_bias=False)(inputs_q)
     k = hk.Linear(num_hiddens, with_bias=False)(inputs_kv)
@@ -73,6 +183,13 @@ class MultiHeadDotProductAttention(hk.Module):
     # Let b=batch_size, t=seq_len, h=num_heads, and d=num_hiddens_per_head.
     attention = jnp.einsum('bthd,bThd->bhtT', q, k)
     attention *= 1.0 / jnp.sqrt(self._num_hiddens_per_head)
+
+    #plt.subplot(1,2,1)
+    #sns.heatmap(attention[1,1,:,:])
+    #plt.subplot(1,2,2)
+    #sns.heatmap(attention[1,2,:,:])
+    #plt.savefig('figs/tmp/attention_matrix.png')
+    #plt.close()
 
     if mask is not None:
       attention = jnp.where(mask, attention, jnp.finfo(jnp.float32).min)
@@ -129,7 +246,64 @@ def embed_sequences(
       lookup_style=hk.EmbedLookupStyle.ARRAY_INDEX,
       w_init=embs_init,
   )
+  sequences = np.arange(128)
   embeddings = embeddings_layer(sequences)
+
+  #graph3d(embeddings)
+  ## We want to graph the sequence on top of the embeddings
+
+   #Only consider 16
+  sns.color_palette('mako')
+  plt.figure()
+  sns.heatmap(embeddings.T)
+  #plt.gca().set_aspect(0.25)
+  #plt.xlim(0, embeddings.shape[1])
+  plt.ylim(0, embeddings.shape[1])
+  #plt.plot(sequences)
+  plt.title('Actual values on top of embedding vector')
+  plt.xlabel('Sequence Number')
+  plt.ylabel('Embedding Vector')
+  plt.savefig('figs/tmp/comp_emb_to_actual.png')
+  plt.close()
+
+  # Try a weird approach
+  import pandas as pd
+  from sklearn.decomposition import PCA
+  pca = PCA(n_components=2)
+  dd = pca.fit_transform(embeddings)
+  dd /= np.linalg.norm(dd, axis = 1)[:,None]
+  plt.figure(figsize = (8,6))
+  sns.scatterplot(x = dd[:, 0], y = dd[:, 1], hue=np.arange(128), palette='rocket', legend = False, s =100)
+  plt.axis('off')
+  plt.savefig('figs/emb_expr/embedding_scatterplot_d128.png')
+  plt.savefig('figs/emb_expr/embedding_scatterplot_d128.eps', dpi = 1200)
+  plt.close()
+  sys.exit(-1)
+
+  #import mpl_toolkits
+  #from mpl_toolkits.mplot3d import Axes3D
+  ## Try 3d figure
+  #ddd = PCA(n_components=3).fit_transform(embeddings)
+  ## Try normalise
+  #ddd = ddd/np.linalg.norm(ddd, axis = 1)[:,None]
+  #print(np.linalg.norm(ddd, axis = 1).shape)
+  #fig = plt.figure(figsize=(6,6))
+  #ax = Axes3D(fig, auto_add_to_figure=False)
+  #fig.add_axes(ax)
+
+  ## plot
+  #from matplotlib.colors import ListedColormap
+  #cmap = ListedColormap(sns.color_palette("rocket", 128).as_hex())
+
+  #sc = ax.scatter(xs = ddd[:,0], ys=ddd[:,1], zs=ddd[:,2], c=np.arange(128), cmap=cmap)
+  #ax.set_axis_off()
+
+
+  ## save
+  #plt.savefig("figs/tmp/threedeescatter.png", bbox_inches='tight')
+
+  #sys.exit(-1)
+
   embeddings *= jnp.sqrt(config.embedding_dim)
 
   _, sequence_length, embedding_size = embeddings.shape

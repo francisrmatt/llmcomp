@@ -6,6 +6,6 @@ lr: 1e-5
 model: btransformer
 num_heads: 32
 num_layers: 16
-training: 4
+training: 604
 vocab_size: 128
 widening_factor: 4

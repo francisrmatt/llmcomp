@@ -1,6 +1,9 @@
 """Project wide default values"""
 from btransformer.transformer import TransformerConfig
-from llama.llama import LlamaConfig
+#from llama.llama import LlamaConfig
+# Do logging levels
+import os
+LOG_LEVEL = os.environ.get('LLMCOMP_LOG_LEVEL', 'INFO')
 
 LOGGING_CONFIG = {
     'version' : 1,
@@ -12,39 +15,44 @@ LOGGING_CONFIG = {
         {'console' : {
             'class' : 'logging.StreamHandler',
             'formatter' : 'standard',
-            'level' : 'INFO',
+            'level' : LOG_LEVEL,
         },
          'file' : {
              'class' : 'logging.FileHandler',
              'formatter' : 'standard',
              'filename' : 'debug.log',
-             'level' : 'INFO',
+             'level' : LOG_LEVEL,
          }},
     'loggers' : {
         '' : {
             'handlers' : ['console', 'file'],
-            'level' : 'INFO',
+            'level' : LOG_LEVEL,
             'propagate' : False,
         },
         'compressor' : {
             'handlers' : ['console', 'file'],
-            'level' : 'INFO',
+            'level' : LOG_LEVEL,
             'propagate' : False,
         },
         'get_data' : {
             'handlers' : ['console', 'file'],
-            'level' : 'INFO',
+            'level' : LOG_LEVEL,
             'propagate' : False,
         },
         'language_model' : {
             'handlers' : ['console', 'file'],
-            'level' : 'INFO',
+            'level' : LOG_LEVEL,
             'propagate' : False,
         },
         # Add as needed
         'btransformer.train' : {
             'handlers' : ['console', 'file'],
-            'level' : 'INFO',
+            'level' : LOG_LEVEL,
+            'propagate' : False,
+        },
+        'llama.compress' : {
+            'handlers' : ['console', 'file'],
+            'level' : LOG_LEVEL,
             'propagate' : False,
         },
     }
@@ -58,6 +66,6 @@ TRANSFORMER_CONFIG = TransformerConfig(
         widening_factor = 4,
 )
 
-LLAMA_CONFIG = LlamaConfig()
+#LLAMA_CONFIG = LlamaConfig()
 
 CODER_PRECISION = 32

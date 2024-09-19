@@ -1,5 +1,4 @@
 import torch
-import math
 import numpy as np
 from jax import grad,vmap
 from tqdm import tqdm
@@ -8,43 +7,9 @@ import pickle
 from transformers import (
     LlamaForCausalLM, 
     LlamaTokenizer, 
+    set_seed,
 )
 from llama.serialize import serialize_arr, deserialize_str, SerializerSettings
-import dataclasses
-from scipy.special import log_softmax
-
-@dataclasses.dataclass(kw_only=True)
-class LlamaConfig:
-    """
-    Settings for serialization of numbers.
-
-    Attributes:
-    - base (int): The base for number representation.
-    - prec (int): The precision after the 'decimal' point in the base representation.
-    - signed (bool): If True, allows negative numbers. Default is False.
-    - fixed_length (bool): If True, ensures fixed length of serialized string. Default is False.
-    - max_val (float): Maximum absolute value of number for serialization.
-    - time_sep (str): Separator for different time steps.
-    - bit_sep (str): Separator for individual digits.
-    - plus_sign (str): String representation for positive sign.
-    - minus_sign (str): String representation for negative sign.
-    - half_bin_correction (bool): If True, applies half bin correction during deserialization. Default is True.
-    - decimal_point (str): String representation for the decimal point.
-    """
-    base: int = 10
-    prec: int = 3
-    signed: bool = True
-    fixed_length: bool = False
-    max_val: float = 1e7
-    time_sep: str = ','
-    bit_sep: str = ''
-    plus_sign: str = ''
-    minus_sign: str = '-'
-    half_bin_correction: bool = True
-    decimal_point: str = ''
-    missing_str: str = ' Nan'
-
-
 
 DEFAULT_EOS_TOKEN = "</s>"
 DEFAULT_BOS_TOKEN = "<s>"
@@ -160,137 +125,58 @@ def llama_nll_fn(model, input_arr, target_arr, settings:SerializerSettings, tran
     avg_logdet_dydx = np.log(vmap(grad(transform))(target_arr)).mean()
     return transformed_nll-avg_logdet_dydx
 
-# Should change this to effectively just be input and config
 def llama_completion_fn(
-    #model,
-    input,
-    #steps,
+    model,
+    input_str,
+    steps,
     settings,
     batch_size=1, # Change to 1, no need to do it 5 times
-    num_samples=1,
+    num_samples=20,
     temp=0.9, 
     top_p=0.9,
     cache_model=True
 ):
-    model = '7b'
-    steps = 10
 
-    # Hex
-    #input_str = ','.join([settings.bit_sep+('{:x}'.format(b)) for b in input[0]]) + ','
-    # Decimal
-    input_str = ','.join([settings.bit_sep+('{:d}'.format(b)) for b in input[0]]) + ','
-    input_str = ','.join([settings.bit_sep+('{:d}'.format(b)) for b in input[0]]) + ','
-
-    # Need to convert input into a string
     avg_tokens_per_step = len(tokenize_fn(input_str, model)['input_ids']) / len(input_str.split(settings.time_sep))
     max_tokens = int(avg_tokens_per_step*steps)
-
-    # Override
-    max_tokens = 1
     
     model, tokenizer = get_model_and_tokenizer(model, cache_model=cache_model)
 
-    gen_strs = {
-        '' : 0,
-        '0' : 0,
-        '1' : 0,
-        '2' : 0,
-        '3' : 0,
-        '4' : 0,
-        '5' : 0,
-        '6' : 0,
-        '7' : 0,
-        '8' : 0,
-        '9' : 0,
-    }
-
-    #for _ in tqdm(range(num_samples // batch_size)):
-    for prefix in gen_strs:
-        print(input_str + prefix)
+    gen_strs = []
+    for _ in tqdm(range(num_samples // batch_size)):
         batch = tokenizer(
-            [input_str + prefix], 
+            [input_str], 
             return_tensors="pt",
         )
+        # What if we forced a 0 out front
 
         batch = {k: v.repeat(batch_size, 1) for k, v in batch.items()}
         batch = {k: v.cuda() for k, v in batch.items()}
         num_input_ids = batch['input_ids'].shape[1]
 
-        #good_tokens_str = list("0123456789abcdef" + settings.time_sep)
-        good_tokens_str = list("0123456789,")
+        good_tokens_str = list("0123456789" + settings.time_sep)
         good_tokens = [tokenizer.convert_tokens_to_ids(token) for token in good_tokens_str]
         # good_tokens += [tokenizer.eos_token_id]
         bad_tokens = [i for i in range(len(tokenizer)) if i not in good_tokens]
 
+        set_seed(0)
         generate_ids = model.generate(
             **batch,
-            do_sample=True, # Changed to false for greedy token choice i.e. temp does not matter
+            do_sample=False, # Changed to false for greedy token choice i.e. temp does not matter
             max_new_tokens=max_tokens,
-            temperature=temp,  # Unset due to do_sample
-            top_p=top_p,  # Unset as 
+            #temperature=temp,  # Unset due to do_sample
+            #top_p=top_p,  # Unset as 
             bad_words_ids=[[t] for t in bad_tokens],
             renormalize_logits=True,
             output_scores = True,
             return_dict_in_generate = True,
-            output_attentions = True,
         )
 
-        # For now lets just use base array and repeat
-        #to_return =generate_ids['scores'][0][0][good_tokens].cpu().repeat_interleave(16)
 
-        to_return =generate_ids['scores'][0][0][good_tokens].cpu()
+        gen_strs += tokenizer.batch_decode(
+            generate_ids['sequences'][:, num_input_ids:],
+            skip_special_tokens=True, 
+            clean_up_tokenization_spaces=False
+        )
 
-        # This is very hacky
-        #actual_return = list()
-        #for i in range(256):
-            #actual_return.append(to_return[int(str(i)[0])])
-
-        gen_strs[prefix] = log_softmax(to_return)
-        #gen_strs[prefix] = (log_softmax(actual_return))[None][None]
-
-        # We want to consider generate_ids['scores'] as this is the output pdf of Llama
-        #gen_strs.append(generate_ids['scores'])
-
-        #print('saving generate_ids')
-        #with open("generate_ids.data", "wb") as f:
-        #    pickle.dump(generate_ids, f)
-
-        #generate_ids = generate_ids['sequences']
-
-        #gen_strs += tokenizer.batch_decode(
-        #    generate_ids[:, num_input_ids:],
-        #    skip_special_tokens=True, 
-        #    clean_up_tokenization_spaces=False
-        #)
-
-    print(f'{gen_strs}')
-    actual_return = list()
-    for i in range(256):
-        if i > 0:
-            digits = int(math.log10(i))+1
-        elif i == 0:
-            digits = 1
-        msd = int(str(i)[0])
-        msds = str(msd)
-
-        match digits:
-            case 1:
-                res = gen_strs[''][msd] * gen_strs[msds][10]
-            case 2:
-                msd2 = int(str(i)[1])
-                res = gen_strs[''][msd] * gen_strs[msds][msd2]
-            case 3:
-                msd2 = int(str(i)[1])
-                res = gen_strs[''][msd] * gen_strs[msds][msd2]
-
-        if math.isinf(res):
-            res = -10
-        if math.isnan(res):
-            res = -10
-
-        actual_return.append(res)
-
-    print(actual_return)
-    print(log_softmax(actual_return))
-    return (log_softmax(actual_return))[None][None]
-    #return gen_strs
+    return gen_strs, generate_ids['scores']

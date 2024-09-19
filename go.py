@@ -26,6 +26,8 @@ parser.add_argument('--amt', dest = 'amt')
 parser.add_argument('--cw', dest = 'cw')
 parser.add_argument('--which', dest = 'which')
 parser.add_argument('--stream', dest = 'stream', action=argparse.BooleanOptionalAction)
+parser.add_argument('--shh', dest = 'shh', action=argparse.BooleanOptionalAction)
+parser.add_argument('--rchunks', dest = 'rchunks', action=argparse.BooleanOptionalAction)
 parser.add_argument('--file', dest = 'file')
 parser.add_argument('--chunks', dest = 'chunks')
 parser.add_argument('--offset', dest = 'offset')
@@ -37,9 +39,19 @@ import logging.config
 logging.config.dictConfig(constants.LOGGING_CONFIG)
 logger = logging.getLogger()
 
+def eval():
+    
+    logger.info('--- EVALUATING COMPRESSOR ---') 
+
+    which = args.which
+    if not os.path.isdir(f'params/{which}'):
+        logger.error(f'{which} is not a valid parameter set, quitting.')
+        sys.exit(-1)
+
 def train():
 
     # Check which is a valid folder
+    logger.info('---- BEGINNING TRAINING ----')
     which = args.which
     if not os.path.isdir(f'params/{which}'):
         logger.error(f'{which} is not a valid parameter set, quitting.')
@@ -55,9 +67,9 @@ def train():
     if new_train:
         logger.info(f'New parameters')
     else:
-        logger.info(f'Old parameters with {info['training']} runs')
+        logger.info(f'Old parameters with {info["training"]} runs')
 
-    logger.info(f'Training with an extra {args.amt} steps with batch size {info['bs']}')
+    logger.info(f'Training with an extra {args.amt} steps with batch size {info["bs"]}')
 
     config = TransformerConfig(
         vocab_size = info['vocab_size'],
@@ -77,8 +89,9 @@ def train():
         config = config,
         training_steps = int(args.amt),
         cw = info['cw'],
-        log_every = int(args.amt)//1000,
+        log_every = int(args.amt)//10,
         batch_size = info['bs'],
+        use_tqdm = not args.shh,
     )
     t1 = time.perf_counter()
     running_time = t1 - t0
@@ -127,10 +140,13 @@ def compress():
     # the compression function
 
     # What we actually want to do is pass in 'c512_001' and load in the info file
+    logger.info('---- BEGINNING COMPRESSION ----')
     compressor_name = args.compressor
-    if compressor_name == 'gzip':
+    if compressor_name == 'gzip' or compressor_name == 'llama':
         config = None
         cw = int(args.cw)
+        info = {}
+        info['vocab_size'] = 256
     else:
         with open(f'params/{args.which}/info.yml', 'r') as f:
             info = yaml.safe_load(f)
@@ -152,17 +168,19 @@ def compress():
         stream_mode = 1
         cw = 0
 
-    logging.info(f'Considering model {args.which} using compressor {compressor_name}')
-
-    if not args.offset:
-        offset = 0
-    else:
-        offset = int(args.offset)
+    offset = 0 if not args.offset else int(args.offset)
+    scale = 0 if not args.scale else float(args.scale)
+    rchunks = 0 if not args.rchunks else 1
         
     if not args.scale:
         scale = 1.0
     else:
         scale = float(args.scale)
+
+    logging.info(f'Considering model {args.which} using compressor {compressor_name}')
+    logging.info(f'Model information: {config}')
+    logging.info(f'Scale = {scale}, Offset = {offset}')
+
 
     data = get_data.fetch(stream_mode = stream_mode,
                                amt = int(args.amt),
@@ -171,6 +189,7 @@ def compress():
                                scale = scale,
                                offset = offset,
                                map_fn = None,
+                               rchunks = rchunks,
     )
 
     mask_fn = None

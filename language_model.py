@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import math
+import os
+import pickle
 
 import haiku as hk
 import numpy as np
@@ -79,8 +81,10 @@ def compress_smooth(
   # Logger
   logging.config.dictConfig(constants.LOGGING_CONFIG)
   logger = logging.getLogger(__name__) 
-  logger.info('Initialising smooth compression')
-  logger.info(f'Length of data is: {len(data)}')
+  logger.debug('Initialising smooth compression')
+  logger.debug(f'Length of data is: {len(data)}')
+  # Get figure checker
+  do_fig = int(os.environ.get('LLMCOMP_FIG', '0'))
 
   params = _retrieve_model_params(which_model)
   predict_fn = _retrieve_predict_fn(params, config)
@@ -91,18 +95,10 @@ def compress_smooth(
 
   bits_per_symbol = math.log2(info['vocab_size'])
 
-  # This needs to be replaced
-  #predict_fn = _get_llama()
+  with open('hist.pkl', 'rb') as f:
+    training_dist = pickle.load(f)
 
   sequence_array = np.frombuffer(data, dtype=np.uint8)
-  #sequence_array = np.array(list(data))
-  #sequence_array = np.right_shift(sequence_array, 1)
-
-  # Why was the graph weird
-  plt.figure()
-  plt.plot(sequence_array)
-  plt.savefig('figs/tmp/incoming_to_smooth_compressor.png')
-  plt.close()
 
   output = list()
 
@@ -117,6 +113,7 @@ def compress_smooth(
   sequence_q = deque(maxlen = 32)
   crps_q = []
   prev_len = 0
+  kld_sum = 0
 
   total_b = 0
   compressed_b = 0
@@ -132,6 +129,11 @@ def compress_smooth(
     probs = np.exp(subsequence_probs[0, -1])
     nprobs = utils.normalize_pdf_for_arithmetic_coding(probs)
 
+    # Calculate the Kullback-Leibler (KL) divergence
+    kld_sum += np.sum(
+      training_dist * np.log2(training_dist/nprobs)
+    )
+
     pdf_q.append(nprobs)
     sequence_q.append(symbol)
     encoder.encode(nprobs, symbol)
@@ -142,18 +144,18 @@ def compress_smooth(
     indicator = np.array([0 if idx < symbol else 1 for idx in range(len(cdf))])
     crps = np.sum((cdf-indicator)**2)
     crps_q.append(crps)
-    fig, ax = plt.subplots()
-    plt.plot(cdf2, label = 'CDF Square Adjustment')
-    plt.plot(cdf, label = 'CDF')
-    plt.plot(indicator, label = 'Correct symbol')
-    ax.fill_between(np.arange(0,info['vocab_size']), np.maximum(cdf2, indicator), np.minimum(cdf2, indicator), color="crimson", alpha=0.4)
-    plt.text(0.1, 0.5, f'CRPS = {crps:.02f}')
-    plt.legend()
-    plt.title('CRPS Graph')
-    plt.xlabel('Symbol value')
-    plt.ylabel('Density')
-    plt.savefig('figs/tmp/crps_smooth.png')
-    plt.close()
+    #fig, ax = plt.subplots()
+    #plt.plot(cdf2, label = 'CDF Square Adjustment')
+    #plt.plot(cdf, label = 'CDF')
+    #plt.plot(indicator, label = 'Correct symbol')
+    #ax.fill_between(np.arange(0,info['vocab_size']), np.maximum(cdf2, indicator), np.minimum(cdf2, indicator), color="crimson", alpha=0.4)
+    #plt.text(0.1, 0.5, f'CRPS = {crps:.02f}')
+    #plt.legend()
+    #plt.title('CRPS Graph')
+    #plt.xlabel('Symbol value')
+    #plt.ylabel('Density')
+    #plt.savefig('figs/tmp/crps_smooth.png')
+    #plt.close()
 
     compressed_bits = ''.join(map(str, output))
     n_bits = len(compressed_bits) - prev_len
@@ -162,38 +164,41 @@ def compress_smooth(
     compressed_b += n_bits
 
     coder_rep = str(compressed_bits[-n_bits:]) if n_bits != 0 else '_'
-    logger.info(f'Encoded {offset}th byte ({symbol}) as {coder_rep} : {n_bits} bits @ {nprobs[symbol]*100}%')
-    logger.info(f'Running compression is {compressed_b/total_b*100}%, CRPS: {np.mean(crps_q)}')
+    logger.debug(f'Encoded {offset}th byte ({symbol}) as {coder_rep} : {n_bits} bits @ {nprobs[symbol]*100}%')
+    logger.debug(f'Running compression is {compressed_b/total_b*100}%, CRPS: {np.mean(crps_q)}')
     prev_len = len(compressed_bits)
   
     # Heatmap
-    plt.figure()
-    plt.gca().set_aspect(0.2)
-    A = np.array(list(pdf_q))
-    sns.heatmap(A.T)
-    plt.xlim(0, A.shape[0])
-    plt.ylim(0, A.shape[1])
-    plt.plot(list(sequence_q))
-    plt.savefig('figs/tmp/smooth_heatmap.png')
-    plt.close()
+    if do_fig:
+      plt.figure()
+      plt.gca().set_aspect(0.2)
+      A = np.array(list(pdf_q))
+      sns.heatmap(A.T)
+      plt.xlim(0, A.shape[0])
+      plt.ylim(0, A.shape[1])
+      plt.plot(list(sequence_q))
+      plt.savefig('figs/tmp/smooth_heatmap.png')
+      plt.close()
 
-    # Distribution
-    plt.figure()
-    plt.plot(nprobs)
-    plt.axvline(symbol, ymin = 0, ymax = nprobs[symbol]/max(nprobs),color = 'r')
-    plt.savefig('figs/tmp/smooth_choice_graph.png')
-    plt.close()
+      # Distribution
+      plt.figure()
+      plt.plot(nprobs)
+      plt.axvline(symbol, ymin = 0, ymax = nprobs[symbol]/max(nprobs),color = 'r')
+      plt.savefig('figs/tmp/smooth_choice_graph.png')
+      plt.close()
 
 
   encoder.terminate()
   compressed_bits = ''.join(map(str, output))
-  logger.info(f'Terminated, adding {len(compressed_bits)-prev_len} bits')
+  logger.debug(f'Terminated, adding {len(compressed_bits)-prev_len} bits')
 
   compressed_bytes, num_padded_bits = utils.bits_to_bytes(compressed_bits)
 
-  logger.info(f'Savings bytes with {num_padded_bits} padded bits')
+  logger.debug(f'Savings bytes with {num_padded_bits} padded bits')
   with open('compressed_bytes.data', 'wb') as f:
     f.write(compressed_bytes)
+
+  logger.info(f'Average KLD was {kld_sum/len(sequence_array)}')
 
   if return_num_padded_bits:
     return compressed_bytes, num_padded_bits
@@ -227,17 +232,17 @@ def compress(
   """
   logging.config.dictConfig(constants.LOGGING_CONFIG)
   logger = logging.getLogger(__name__) 
-  logger.info('Initialising btransformer compression')
-  logger.info(f'Length of data is: {len(data)}')
+  logger.debug('Initialising btransformer compression')
+  logger.debug(f'Length of data is: {len(data)}')
 
   params = _retrieve_model_params(which_model)
   predict_fn = _retrieve_predict_fn(params, config)
 
   # Convert the `data` into an array of integers (representing the bytes).
   sequence_array = np.frombuffer(data, dtype=np.uint8)
-  plt.figure()
-  plt.plot(sequence_array)
-  plt.savefig('figs/tmp/incoming_to_compressor.png')
+
+  with open('hist.pkl', 'rb') as f:
+    training_dist = pickle.load(f)
 
   if use_slow_lossless_compression:
     log_probs = list()
@@ -252,6 +257,11 @@ def compress(
     log_probs = predict_fn(sequence_array[None])[0, ...]
   probs = np.exp(log_probs)
 
+  kld = np.average(np.sum(
+      training_dist * np.log2(training_dist/probs),
+      axis = 1
+  ))
+    
   # Plotting
   #if which_compressor == 'llama':
 
@@ -270,15 +280,18 @@ def compress(
   #  plt.savefig('foo.png')
   
   #if which_compressor == 'btransformer':
-  plt.figure()
-  plt.gca().set_aspect(0.1)
-  A = probs
-  sns.heatmap(A.T)
-  plt.xlim(0, A.shape[0])
-  plt.ylim(0, A.shape[1])
-  dw = np.frombuffer(data, dtype = np.uint8)
-  plt.plot(dw)
-  plt.savefig('figs/tmp/non_smooth_heatmap.png')
+
+  #A = probs
+  #print(A.shape)
+  #plt.figure()
+  #plt.gca().set_aspect(32/256)
+  #sns.heatmap(A[0:32, :].T)
+  ##plt.xlim(0, A.shape[0])
+  #plt.ylim(0, A.shape[1])
+  #dw = np.frombuffer(data, dtype = np.uint8)
+  #plt.plot(dw[0:32])
+  #plt.savefig('figs/tmp/non_smooth_heatmap.png')
+  #plt.close()
 
   output = list()
   encoder = arithmetic_coder.Encoder(
@@ -296,10 +309,9 @@ def compress(
   compressed_bits = ''.join(map(str, output))
   compressed_bytes, num_padded_bits = utils.bits_to_bytes(compressed_bits)
 
-  
 
   if return_num_padded_bits:
-    return compressed_bytes, num_padded_bits
+    return compressed_bytes, num_padded_bits, kld
 
   return compressed_bytes
 
@@ -354,16 +366,16 @@ def decompress(
   probs = np.exp(predict_fn(sequence_array[None])[0, ...])
 
   for idx in range(uncompressed_length):
-    logger.info(f'Sequence array fed in is {sequence_array}')
+    logger.debug(f'Sequence array fed in is {sequence_array}')
     token = decoder.decode(
         utils.normalize_pdf_for_arithmetic_coding(probs[idx])
     )
-    logger.info(f'Decompressing {idx}th token, got {token}')
+    logger.debug(f'Decompressing {idx}th token, got {token}')
     sequence_array = np.insert(sequence_array, -1, token)
-    plt.figure()
-    plt.plot(sequence_array)
-    plt.savefig('figs/tmp/decom_output_live.png')
-    plt.close()
+    #plt.figure()
+    #plt.plot(sequence_array)
+    #plt.savefig('figs/tmp/decom_output_live.png')
+    #plt.close()
     probs = np.exp(predict_fn(sequence_array[None])[0, ...])
 
   # Remove the dummy token and convert to bytes.

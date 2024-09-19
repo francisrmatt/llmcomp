@@ -179,6 +179,8 @@ def train_transformer_decoder(
     batch_list = [np.frombuffer(seq, dtype=np.uint8) for seq in batch_list]
     if config.vocab_size == 128:
       batch_list = np.right_shift(batch_list, 1)
+    # Add noise
+    batch_list = batch_list + np.random.normal(0,2,batch_list.shape).astype(np.uint8)
     return np.array(batch_list, dtype=np.uint8)
 
   if new_train:
@@ -197,14 +199,14 @@ def train_transformer_decoder(
   grad_fn = jax.value_and_grad(loss_fn, has_aux=False)
 
   # Make optimizer, to apply the gradients.
-  optimizer = optax.adam(learning_rate=1e-4)
+  optimizer = optax.adam(learning_rate=1e-5)
   opt_state = optimizer.init(params)
 
   logger.info('Initialization done, starting training...')
   last_loss = 0.0
   for step in tqdm.trange(training_steps, disable=not use_tqdm):
     batch = fetch_random_batch()
-    logger.info('Batch fetched.')
+    #logger.info('Batch fetched.')
 
     params, opt_state, logs = _update_parameters(
         params=params,
