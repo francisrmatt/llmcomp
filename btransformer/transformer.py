@@ -246,39 +246,39 @@ def embed_sequences(
       lookup_style=hk.EmbedLookupStyle.ARRAY_INDEX,
       w_init=embs_init,
   )
-  sequences = np.arange(128)
+  #sequences = np.arange(128)
   embeddings = embeddings_layer(sequences)
 
   #graph3d(embeddings)
   ## We want to graph the sequence on top of the embeddings
 
    #Only consider 16
-  sns.color_palette('mako')
-  plt.figure()
-  sns.heatmap(embeddings.T)
-  #plt.gca().set_aspect(0.25)
-  #plt.xlim(0, embeddings.shape[1])
-  plt.ylim(0, embeddings.shape[1])
-  #plt.plot(sequences)
-  plt.title('Actual values on top of embedding vector')
-  plt.xlabel('Sequence Number')
-  plt.ylabel('Embedding Vector')
-  plt.savefig('figs/tmp/comp_emb_to_actual.png')
-  plt.close()
+  #sns.color_palette('mako')
+  #plt.figure()
+  #sns.heatmap(embeddings.T)
+  ##plt.gca().set_aspect(0.25)
+  ##plt.xlim(0, embeddings.shape[1])
+  #plt.ylim(0, embeddings.shape[1])
+  ##plt.plot(sequences)
+  #plt.title('Actual values on top of embedding vector')
+  #plt.xlabel('Sequence Number')
+  #plt.ylabel('Embedding Vector')
+  #plt.savefig('figs/tmp/comp_emb_to_actual.png')
+  #plt.close()
 
-  # Try a weird approach
-  import pandas as pd
-  from sklearn.decomposition import PCA
-  pca = PCA(n_components=2)
-  dd = pca.fit_transform(embeddings)
-  dd /= np.linalg.norm(dd, axis = 1)[:,None]
-  plt.figure(figsize = (8,6))
-  sns.scatterplot(x = dd[:, 0], y = dd[:, 1], hue=np.arange(128), palette='rocket', legend = False, s =100)
-  plt.axis('off')
-  plt.savefig('figs/emb_expr/embedding_scatterplot_d128.png')
-  plt.savefig('figs/emb_expr/embedding_scatterplot_d128.eps', dpi = 1200)
-  plt.close()
-  sys.exit(-1)
+  ## Try a weird approach
+  #import pandas as pd
+  #from sklearn.decomposition import PCA
+  #pca = PCA(n_components=2)
+  #dd = pca.fit_transform(embeddings)
+  #dd /= np.linalg.norm(dd, axis = 1)[:,None]
+  #plt.figure(figsize = (8,6))
+  #sns.scatterplot(x = dd[:, 0], y = dd[:, 1], hue=np.arange(128), palette='rocket', legend = False, s =100)
+  #plt.axis('off')
+  #plt.savefig('figs/emb_expr/embedding_scatterplot_d128.png')
+  #plt.savefig('figs/emb_expr/embedding_scatterplot_d128.eps', dpi = 1200)
+  #plt.close()
+  #sys.exit(-1)
 
   #import mpl_toolkits
   #from mpl_toolkits.mplot3d import Axes3D

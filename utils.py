@@ -104,7 +104,7 @@ def normalize_pdf_for_arithmetic_coding(pdf: chex.Array) -> chex.Array:
   Returns:
     The normalized probabilities.
   """
-  machine_epsilon = 10*(np.finfo(np.float32).eps)
+  machine_epsilon = np.finfo(np.float32).eps
   # Normalize the probabilities to avoid floating-point errors.
   pdf = pdf / np.cumsum(pdf)[-1]
   # Ensure all probabilities are sufficiently large to yield distinct cdfs.

@@ -241,8 +241,8 @@ def compress(
   # Convert the `data` into an array of integers (representing the bytes).
   sequence_array = np.frombuffer(data, dtype=np.uint8)
 
-  with open('hist.pkl', 'rb') as f:
-    training_dist = pickle.load(f)
+  #with open('hist.pkl', 'rb') as f:
+    #training_dist = pickle.load(f)
 
   if use_slow_lossless_compression:
     log_probs = list()
@@ -257,10 +257,10 @@ def compress(
     log_probs = predict_fn(sequence_array[None])[0, ...]
   probs = np.exp(log_probs)
 
-  kld = np.average(np.sum(
-      training_dist * np.log2(training_dist/probs),
-      axis = 1
-  ))
+  #kld = np.average(np.sum(
+      #training_dist * np.log2(training_dist/probs),
+      #axis = 1
+  #))
     
   # Plotting
   #if which_compressor == 'llama':
@@ -311,7 +311,7 @@ def compress(
 
 
   if return_num_padded_bits:
-    return compressed_bytes, num_padded_bits, kld
+    return compressed_bytes, num_padded_bits, 0
 
   return compressed_bytes
 
