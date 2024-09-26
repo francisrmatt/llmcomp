@@ -1,0 +1,618 @@
+2024-09-11 20:55:42,590 root [INFO] ---- BEGINNING TRAINING ----
+2024-09-11 20:55:42,591 root [INFO] Old parameters with 504 runs
+2024-09-11 20:55:42,591 root [INFO] Training with an extra 100 steps with batch size 25
+2024-09-11 20:55:42,592 root [INFO] Parameters for transformer are config=TransformerConfig(vocab_size=128, embedding_dim=128, num_layers=16, num_heads=32, emb_init_scale=0.02, widening_factor=4)
+2024-09-11 20:55:42,593 get_data [INFO] Fetching data in chunk mode with all chunks each size 512
+2024-09-11 20:55:42,593 get_data [INFO] Loading all data
+2024-09-11 20:55:42,740 btransformer.train [INFO] Fetching old parameters
+2024-09-11 20:55:43.724608: W external/xla/xla/service/gpu/nvptx_compiler.cc:836] The NVIDIA driver's CUDA version is 12.2 which is older than the PTX compiler version (12.6.20). Because the driver is older than the PTX compiler version, XLA is disabling parallel compilation, which may slow down compilation. You should update your NVIDIA driver or use the NVIDIA-provided CUDA forward compatibility packages.
+2024-09-11 20:55:44,001 btransformer.train [INFO] Initialization done, starting training...
+2024-09-11 20:55:44,003 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:08,662 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:08,831 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:09,140 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:09,449 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:09,758 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:10,067 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:10,376 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:10,685 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:10,995 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:11,305 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:11,614 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:11,923 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:12,232 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:12,541 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:12,850 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:13,160 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:13,469 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:13,778 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:14,088 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:14,397 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:14,706 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:15,016 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:15,325 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:15,634 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:15,943 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:16,255 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:16,564 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:16,871 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:17,180 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:17,489 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:17,798 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:18,108 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:18,417 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:18,727 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:19,036 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:19,345 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:19,654 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:19,963 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:20,272 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:20,582 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:20,891 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:21,200 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:21,510 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:21,822 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:22,130 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:22,438 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:22,747 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:23,056 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:23,365 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:23,675 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:23,984 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:24,296 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:24,605 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:24,912 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:25,222 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:25,531 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:25,841 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:26,150 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:26,460 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:26,769 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:27,081 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:27,388 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:27,701 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:28,008 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:28,316 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:28,626 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:28,935 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:29,245 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:29,555 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:29,865 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:30,174 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:30,486 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:30,793 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:31,105 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:31,412 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:31,722 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:32,031 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:32,341 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:32,650 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:32,960 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:33,269 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:33,579 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:33,890 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:34,199 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:34,511 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:34,818 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:35,130 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:35,438 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:35,747 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:36,056 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:36,366 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:36,676 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:36,986 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:37,295 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:37,606 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:37,915 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:38,224 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:38,534 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:38,844 btransformer.train [INFO] Batch fetched.
+2024-09-11 20:56:39,593 root [INFO] 100 training run complete (total 604) in 56.61145062700962 seconds with loss 1964.4677734375
+2024-09-11 20:56:39,789 root [INFO] Saved params in params/c512_002/params.npz file
+2024-09-11 20:56:45,223 root [INFO] ---- BEGINNING COMPRESSION ----
+2024-09-11 20:56:45,224 root [INFO] Considering model c512_002 using compressor btransformer
+2024-09-11 20:56:45,225 get_data [INFO] Fetching data in chunk mode with 100 chunks each size 512
+2024-09-11 20:56:45,225 get_data [INFO] Loading test file with offset 0
+2024-09-11 20:56:45,226 get_data [INFO] Ofsetting by 0
+2024-09-11 20:56:45,232 compressor [INFO] Compressing 0th batch
+2024-09-11 20:56:45,233 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:45,233 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:46.343310: W external/xla/xla/service/gpu/nvptx_compiler.cc:836] The NVIDIA driver's CUDA version is 12.2 which is older than the PTX compiler version (12.6.20). Because the driver is older than the PTX compiler version, XLA is disabling parallel compilation, which may slow down compilation. You should update your NVIDIA driver or use the NVIDIA-provided CUDA forward compatibility packages.
+2024-09-11 20:56:49,866 compressor [INFO] Returned 434 bytes
+2024-09-11 20:56:49,867 compressor [INFO] Required 6 padding bits
+2024-09-11 20:56:49,867 compressor [INFO] Compressing 1th batch
+2024-09-11 20:56:49,867 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:49,868 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:50,499 compressor [INFO] Returned 446 bytes
+2024-09-11 20:56:50,499 compressor [INFO] Required 2 padding bits
+2024-09-11 20:56:50,499 compressor [INFO] Compressing 2th batch
+2024-09-11 20:56:50,500 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:50,500 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:51,165 compressor [INFO] Returned 448 bytes
+2024-09-11 20:56:51,166 compressor [INFO] Required 4 padding bits
+2024-09-11 20:56:51,166 compressor [INFO] Compressing 3th batch
+2024-09-11 20:56:51,166 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:51,166 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:51,820 compressor [INFO] Returned 444 bytes
+2024-09-11 20:56:51,821 compressor [INFO] Required 0 padding bits
+2024-09-11 20:56:51,821 compressor [INFO] Compressing 4th batch
+2024-09-11 20:56:51,822 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:51,822 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:52,475 compressor [INFO] Returned 445 bytes
+2024-09-11 20:56:52,476 compressor [INFO] Required 1 padding bits
+2024-09-11 20:56:52,476 compressor [INFO] Compressing 5th batch
+2024-09-11 20:56:52,476 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:52,477 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:53,117 compressor [INFO] Returned 444 bytes
+2024-09-11 20:56:53,117 compressor [INFO] Required 2 padding bits
+2024-09-11 20:56:53,117 compressor [INFO] Compressing 6th batch
+2024-09-11 20:56:53,118 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:53,118 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:53,767 compressor [INFO] Returned 445 bytes
+2024-09-11 20:56:53,767 compressor [INFO] Required 7 padding bits
+2024-09-11 20:56:53,767 compressor [INFO] Compressing 7th batch
+2024-09-11 20:56:53,768 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:53,768 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:54,421 compressor [INFO] Returned 443 bytes
+2024-09-11 20:56:54,422 compressor [INFO] Required 3 padding bits
+2024-09-11 20:56:54,422 compressor [INFO] Compressing 8th batch
+2024-09-11 20:56:54,422 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:54,422 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:55,063 compressor [INFO] Returned 443 bytes
+2024-09-11 20:56:55,063 compressor [INFO] Required 3 padding bits
+2024-09-11 20:56:55,064 compressor [INFO] Compressing 9th batch
+2024-09-11 20:56:55,064 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:55,064 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:55,920 compressor [INFO] Returned 442 bytes
+2024-09-11 20:56:55,921 compressor [INFO] Required 3 padding bits
+2024-09-11 20:56:55,921 compressor [INFO] Compressing 10th batch
+2024-09-11 20:56:55,921 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:55,922 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:56,552 compressor [INFO] Returned 444 bytes
+2024-09-11 20:56:56,553 compressor [INFO] Required 7 padding bits
+2024-09-11 20:56:56,553 compressor [INFO] Compressing 11th batch
+2024-09-11 20:56:56,553 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:56,554 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:57,181 compressor [INFO] Returned 445 bytes
+2024-09-11 20:56:57,181 compressor [INFO] Required 1 padding bits
+2024-09-11 20:56:57,181 compressor [INFO] Compressing 12th batch
+2024-09-11 20:56:57,182 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:57,182 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:57,815 compressor [INFO] Returned 444 bytes
+2024-09-11 20:56:57,816 compressor [INFO] Required 5 padding bits
+2024-09-11 20:56:57,816 compressor [INFO] Compressing 13th batch
+2024-09-11 20:56:57,816 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:57,816 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:58,453 compressor [INFO] Returned 442 bytes
+2024-09-11 20:56:58,454 compressor [INFO] Required 7 padding bits
+2024-09-11 20:56:58,454 compressor [INFO] Compressing 14th batch
+2024-09-11 20:56:58,454 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:58,455 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:59,081 compressor [INFO] Returned 438 bytes
+2024-09-11 20:56:59,081 compressor [INFO] Required 7 padding bits
+2024-09-11 20:56:59,081 compressor [INFO] Compressing 15th batch
+2024-09-11 20:56:59,082 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:59,082 language_model [INFO] Length of data is: 512
+2024-09-11 20:56:59,721 compressor [INFO] Returned 437 bytes
+2024-09-11 20:56:59,721 compressor [INFO] Required 3 padding bits
+2024-09-11 20:56:59,721 compressor [INFO] Compressing 16th batch
+2024-09-11 20:56:59,722 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:56:59,722 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:00,365 compressor [INFO] Returned 441 bytes
+2024-09-11 20:57:00,365 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:00,365 compressor [INFO] Compressing 17th batch
+2024-09-11 20:57:00,366 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:00,366 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:01,010 compressor [INFO] Returned 442 bytes
+2024-09-11 20:57:01,011 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:01,011 compressor [INFO] Compressing 18th batch
+2024-09-11 20:57:01,012 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:01,012 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:01,665 compressor [INFO] Returned 445 bytes
+2024-09-11 20:57:01,665 compressor [INFO] Required 5 padding bits
+2024-09-11 20:57:01,665 compressor [INFO] Compressing 19th batch
+2024-09-11 20:57:01,666 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:01,666 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:02,534 compressor [INFO] Returned 443 bytes
+2024-09-11 20:57:02,534 compressor [INFO] Required 4 padding bits
+2024-09-11 20:57:02,534 compressor [INFO] Compressing 20th batch
+2024-09-11 20:57:02,535 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:02,535 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:03,173 compressor [INFO] Returned 445 bytes
+2024-09-11 20:57:03,173 compressor [INFO] Required 7 padding bits
+2024-09-11 20:57:03,173 compressor [INFO] Compressing 21th batch
+2024-09-11 20:57:03,174 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:03,174 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:03,802 compressor [INFO] Returned 444 bytes
+2024-09-11 20:57:03,803 compressor [INFO] Required 3 padding bits
+2024-09-11 20:57:03,803 compressor [INFO] Compressing 22th batch
+2024-09-11 20:57:03,803 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:03,804 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:04,424 compressor [INFO] Returned 443 bytes
+2024-09-11 20:57:04,424 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:04,424 compressor [INFO] Compressing 23th batch
+2024-09-11 20:57:04,425 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:04,425 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:05,055 compressor [INFO] Returned 440 bytes
+2024-09-11 20:57:05,055 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:05,055 compressor [INFO] Compressing 24th batch
+2024-09-11 20:57:05,056 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:05,056 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:05,689 compressor [INFO] Returned 441 bytes
+2024-09-11 20:57:05,689 compressor [INFO] Required 4 padding bits
+2024-09-11 20:57:05,689 compressor [INFO] Compressing 25th batch
+2024-09-11 20:57:05,690 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:05,690 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:06,329 compressor [INFO] Returned 441 bytes
+2024-09-11 20:57:06,329 compressor [INFO] Required 7 padding bits
+2024-09-11 20:57:06,329 compressor [INFO] Compressing 26th batch
+2024-09-11 20:57:06,330 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:06,330 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:06,972 compressor [INFO] Returned 443 bytes
+2024-09-11 20:57:06,973 compressor [INFO] Required 0 padding bits
+2024-09-11 20:57:06,973 compressor [INFO] Compressing 27th batch
+2024-09-11 20:57:06,973 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:06,974 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:07,826 compressor [INFO] Returned 445 bytes
+2024-09-11 20:57:07,826 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:07,826 compressor [INFO] Compressing 28th batch
+2024-09-11 20:57:07,827 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:07,827 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:08,470 compressor [INFO] Returned 444 bytes
+2024-09-11 20:57:08,470 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:08,470 compressor [INFO] Compressing 29th batch
+2024-09-11 20:57:08,471 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:08,471 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:09,109 compressor [INFO] Returned 442 bytes
+2024-09-11 20:57:09,110 compressor [INFO] Required 6 padding bits
+2024-09-11 20:57:09,110 compressor [INFO] Compressing 30th batch
+2024-09-11 20:57:09,110 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:09,110 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:09,747 compressor [INFO] Returned 437 bytes
+2024-09-11 20:57:09,747 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:09,747 compressor [INFO] Compressing 31th batch
+2024-09-11 20:57:09,748 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:09,748 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:10,384 compressor [INFO] Returned 435 bytes
+2024-09-11 20:57:10,384 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:10,384 compressor [INFO] Compressing 32th batch
+2024-09-11 20:57:10,385 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:10,385 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:11,026 compressor [INFO] Returned 439 bytes
+2024-09-11 20:57:11,026 compressor [INFO] Required 6 padding bits
+2024-09-11 20:57:11,026 compressor [INFO] Compressing 33th batch
+2024-09-11 20:57:11,027 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:11,027 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:11,668 compressor [INFO] Returned 442 bytes
+2024-09-11 20:57:11,668 compressor [INFO] Required 7 padding bits
+2024-09-11 20:57:11,668 compressor [INFO] Compressing 34th batch
+2024-09-11 20:57:11,669 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:11,669 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:12,313 compressor [INFO] Returned 444 bytes
+2024-09-11 20:57:12,313 compressor [INFO] Required 0 padding bits
+2024-09-11 20:57:12,313 compressor [INFO] Compressing 35th batch
+2024-09-11 20:57:12,314 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:12,314 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:12,950 compressor [INFO] Returned 443 bytes
+2024-09-11 20:57:12,951 compressor [INFO] Required 7 padding bits
+2024-09-11 20:57:12,951 compressor [INFO] Compressing 36th batch
+2024-09-11 20:57:12,951 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:12,951 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:13,591 compressor [INFO] Returned 444 bytes
+2024-09-11 20:57:13,591 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:13,591 compressor [INFO] Compressing 37th batch
+2024-09-11 20:57:13,592 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:13,592 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:14,438 compressor [INFO] Returned 443 bytes
+2024-09-11 20:57:14,438 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:14,438 compressor [INFO] Compressing 38th batch
+2024-09-11 20:57:14,439 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:14,439 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:15,076 compressor [INFO] Returned 443 bytes
+2024-09-11 20:57:15,076 compressor [INFO] Required 4 padding bits
+2024-09-11 20:57:15,076 compressor [INFO] Compressing 39th batch
+2024-09-11 20:57:15,077 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:15,077 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:15,702 compressor [INFO] Returned 440 bytes
+2024-09-11 20:57:15,702 compressor [INFO] Required 3 padding bits
+2024-09-11 20:57:15,702 compressor [INFO] Compressing 40th batch
+2024-09-11 20:57:15,703 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:15,703 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:16,332 compressor [INFO] Returned 441 bytes
+2024-09-11 20:57:16,332 compressor [INFO] Required 0 padding bits
+2024-09-11 20:57:16,332 compressor [INFO] Compressing 41th batch
+2024-09-11 20:57:16,333 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:16,333 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:16,969 compressor [INFO] Returned 442 bytes
+2024-09-11 20:57:16,969 compressor [INFO] Required 3 padding bits
+2024-09-11 20:57:16,969 compressor [INFO] Compressing 42th batch
+2024-09-11 20:57:16,970 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:16,970 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:17,611 compressor [INFO] Returned 445 bytes
+2024-09-11 20:57:17,611 compressor [INFO] Required 4 padding bits
+2024-09-11 20:57:17,611 compressor [INFO] Compressing 43th batch
+2024-09-11 20:57:17,612 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:17,612 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:18,246 compressor [INFO] Returned 446 bytes
+2024-09-11 20:57:18,246 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:18,246 compressor [INFO] Compressing 44th batch
+2024-09-11 20:57:18,247 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:18,247 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:18,884 compressor [INFO] Returned 445 bytes
+2024-09-11 20:57:18,884 compressor [INFO] Required 7 padding bits
+2024-09-11 20:57:18,884 compressor [INFO] Compressing 45th batch
+2024-09-11 20:57:18,885 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:18,885 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:19,518 compressor [INFO] Returned 442 bytes
+2024-09-11 20:57:19,518 compressor [INFO] Required 5 padding bits
+2024-09-11 20:57:19,519 compressor [INFO] Compressing 46th batch
+2024-09-11 20:57:19,519 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:19,519 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:20,363 compressor [INFO] Returned 436 bytes
+2024-09-11 20:57:20,363 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:20,363 compressor [INFO] Compressing 47th batch
+2024-09-11 20:57:20,364 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:20,364 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:20,996 compressor [INFO] Returned 433 bytes
+2024-09-11 20:57:20,996 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:20,996 compressor [INFO] Compressing 48th batch
+2024-09-11 20:57:20,997 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:20,997 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:21,626 compressor [INFO] Returned 437 bytes
+2024-09-11 20:57:21,626 compressor [INFO] Required 5 padding bits
+2024-09-11 20:57:21,626 compressor [INFO] Compressing 49th batch
+2024-09-11 20:57:21,627 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:21,627 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:22,261 compressor [INFO] Returned 439 bytes
+2024-09-11 20:57:22,261 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:22,261 compressor [INFO] Compressing 50th batch
+2024-09-11 20:57:22,262 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:22,262 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:22,892 compressor [INFO] Returned 444 bytes
+2024-09-11 20:57:22,892 compressor [INFO] Required 3 padding bits
+2024-09-11 20:57:22,892 compressor [INFO] Compressing 51th batch
+2024-09-11 20:57:22,893 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:22,893 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:23,514 compressor [INFO] Returned 442 bytes
+2024-09-11 20:57:23,514 compressor [INFO] Required 4 padding bits
+2024-09-11 20:57:23,514 compressor [INFO] Compressing 52th batch
+2024-09-11 20:57:23,515 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:23,515 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:24,143 compressor [INFO] Returned 443 bytes
+2024-09-11 20:57:24,143 compressor [INFO] Required 5 padding bits
+2024-09-11 20:57:24,143 compressor [INFO] Compressing 53th batch
+2024-09-11 20:57:24,144 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:24,144 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:24,770 compressor [INFO] Returned 441 bytes
+2024-09-11 20:57:24,770 compressor [INFO] Required 5 padding bits
+2024-09-11 20:57:24,770 compressor [INFO] Compressing 54th batch
+2024-09-11 20:57:24,771 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:24,771 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:25,616 compressor [INFO] Returned 439 bytes
+2024-09-11 20:57:25,616 compressor [INFO] Required 7 padding bits
+2024-09-11 20:57:25,616 compressor [INFO] Compressing 55th batch
+2024-09-11 20:57:25,617 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:25,617 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:26,246 compressor [INFO] Returned 436 bytes
+2024-09-11 20:57:26,247 compressor [INFO] Required 7 padding bits
+2024-09-11 20:57:26,247 compressor [INFO] Compressing 56th batch
+2024-09-11 20:57:26,247 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:26,248 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:26,874 compressor [INFO] Returned 438 bytes
+2024-09-11 20:57:26,874 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:26,874 compressor [INFO] Compressing 57th batch
+2024-09-11 20:57:26,875 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:26,875 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:27,504 compressor [INFO] Returned 439 bytes
+2024-09-11 20:57:27,504 compressor [INFO] Required 6 padding bits
+2024-09-11 20:57:27,504 compressor [INFO] Compressing 58th batch
+2024-09-11 20:57:27,505 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:27,505 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:28,138 compressor [INFO] Returned 441 bytes
+2024-09-11 20:57:28,138 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:28,138 compressor [INFO] Compressing 59th batch
+2024-09-11 20:57:28,139 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:28,139 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:28,772 compressor [INFO] Returned 442 bytes
+2024-09-11 20:57:28,772 compressor [INFO] Required 7 padding bits
+2024-09-11 20:57:28,772 compressor [INFO] Compressing 60th batch
+2024-09-11 20:57:28,773 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:28,773 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:29,410 compressor [INFO] Returned 438 bytes
+2024-09-11 20:57:29,410 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:29,410 compressor [INFO] Compressing 61th batch
+2024-09-11 20:57:29,411 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:29,411 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:30,042 compressor [INFO] Returned 434 bytes
+2024-09-11 20:57:30,042 compressor [INFO] Required 4 padding bits
+2024-09-11 20:57:30,042 compressor [INFO] Compressing 62th batch
+2024-09-11 20:57:30,043 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:30,043 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:30,671 compressor [INFO] Returned 428 bytes
+2024-09-11 20:57:30,671 compressor [INFO] Required 0 padding bits
+2024-09-11 20:57:30,671 compressor [INFO] Compressing 63th batch
+2024-09-11 20:57:30,672 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:30,672 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:31,527 compressor [INFO] Returned 426 bytes
+2024-09-11 20:57:31,527 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:31,527 compressor [INFO] Compressing 64th batch
+2024-09-11 20:57:31,528 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:31,528 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:32,156 compressor [INFO] Returned 430 bytes
+2024-09-11 20:57:32,156 compressor [INFO] Required 5 padding bits
+2024-09-11 20:57:32,156 compressor [INFO] Compressing 65th batch
+2024-09-11 20:57:32,157 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:32,157 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:32,809 compressor [INFO] Returned 433 bytes
+2024-09-11 20:57:32,809 compressor [INFO] Required 4 padding bits
+2024-09-11 20:57:32,809 compressor [INFO] Compressing 66th batch
+2024-09-11 20:57:32,810 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:32,810 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:33,440 compressor [INFO] Returned 437 bytes
+2024-09-11 20:57:33,440 compressor [INFO] Required 0 padding bits
+2024-09-11 20:57:33,440 compressor [INFO] Compressing 67th batch
+2024-09-11 20:57:33,441 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:33,441 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:34,072 compressor [INFO] Returned 434 bytes
+2024-09-11 20:57:34,072 compressor [INFO] Required 0 padding bits
+2024-09-11 20:57:34,072 compressor [INFO] Compressing 68th batch
+2024-09-11 20:57:34,073 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:34,073 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:34,696 compressor [INFO] Returned 435 bytes
+2024-09-11 20:57:34,696 compressor [INFO] Required 3 padding bits
+2024-09-11 20:57:34,697 compressor [INFO] Compressing 69th batch
+2024-09-11 20:57:34,697 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:34,697 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:35,322 compressor [INFO] Returned 434 bytes
+2024-09-11 20:57:35,323 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:35,323 compressor [INFO] Compressing 70th batch
+2024-09-11 20:57:35,323 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:35,323 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:35,962 compressor [INFO] Returned 434 bytes
+2024-09-11 20:57:35,963 compressor [INFO] Required 6 padding bits
+2024-09-11 20:57:35,963 compressor [INFO] Compressing 71th batch
+2024-09-11 20:57:35,963 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:35,964 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:36,603 compressor [INFO] Returned 431 bytes
+2024-09-11 20:57:36,603 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:36,603 compressor [INFO] Compressing 72th batch
+2024-09-11 20:57:36,604 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:36,604 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:37,478 compressor [INFO] Returned 434 bytes
+2024-09-11 20:57:37,478 compressor [INFO] Required 6 padding bits
+2024-09-11 20:57:37,478 compressor [INFO] Compressing 73th batch
+2024-09-11 20:57:37,479 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:37,479 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:38,131 compressor [INFO] Returned 433 bytes
+2024-09-11 20:57:38,132 compressor [INFO] Required 5 padding bits
+2024-09-11 20:57:38,132 compressor [INFO] Compressing 74th batch
+2024-09-11 20:57:38,133 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:38,133 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:38,772 compressor [INFO] Returned 434 bytes
+2024-09-11 20:57:38,772 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:38,772 compressor [INFO] Compressing 75th batch
+2024-09-11 20:57:38,773 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:38,773 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:39,423 compressor [INFO] Returned 435 bytes
+2024-09-11 20:57:39,423 compressor [INFO] Required 7 padding bits
+2024-09-11 20:57:39,423 compressor [INFO] Compressing 76th batch
+2024-09-11 20:57:39,424 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:39,424 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:40,069 compressor [INFO] Returned 433 bytes
+2024-09-11 20:57:40,070 compressor [INFO] Required 5 padding bits
+2024-09-11 20:57:40,070 compressor [INFO] Compressing 77th batch
+2024-09-11 20:57:40,070 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:40,070 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:40,702 compressor [INFO] Returned 430 bytes
+2024-09-11 20:57:40,702 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:40,703 compressor [INFO] Compressing 78th batch
+2024-09-11 20:57:40,703 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:40,703 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:41,344 compressor [INFO] Returned 425 bytes
+2024-09-11 20:57:41,344 compressor [INFO] Required 0 padding bits
+2024-09-11 20:57:41,344 compressor [INFO] Compressing 79th batch
+2024-09-11 20:57:41,345 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:41,345 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:41,984 compressor [INFO] Returned 423 bytes
+2024-09-11 20:57:41,984 compressor [INFO] Required 5 padding bits
+2024-09-11 20:57:41,984 compressor [INFO] Compressing 80th batch
+2024-09-11 20:57:41,985 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:41,985 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:42,631 compressor [INFO] Returned 426 bytes
+2024-09-11 20:57:42,631 compressor [INFO] Required 6 padding bits
+2024-09-11 20:57:42,631 compressor [INFO] Compressing 81th batch
+2024-09-11 20:57:42,632 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:42,632 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:43,501 compressor [INFO] Returned 429 bytes
+2024-09-11 20:57:43,501 compressor [INFO] Required 7 padding bits
+2024-09-11 20:57:43,501 compressor [INFO] Compressing 82th batch
+2024-09-11 20:57:43,502 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:43,502 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:44,155 compressor [INFO] Returned 433 bytes
+2024-09-11 20:57:44,155 compressor [INFO] Required 0 padding bits
+2024-09-11 20:57:44,155 compressor [INFO] Compressing 83th batch
+2024-09-11 20:57:44,156 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:44,156 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:44,805 compressor [INFO] Returned 430 bytes
+2024-09-11 20:57:44,806 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:44,806 compressor [INFO] Compressing 84th batch
+2024-09-11 20:57:44,806 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:44,806 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:45,454 compressor [INFO] Returned 430 bytes
+2024-09-11 20:57:45,454 compressor [INFO] Required 0 padding bits
+2024-09-11 20:57:45,454 compressor [INFO] Compressing 85th batch
+2024-09-11 20:57:45,455 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:45,455 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:46,104 compressor [INFO] Returned 430 bytes
+2024-09-11 20:57:46,104 compressor [INFO] Required 5 padding bits
+2024-09-11 20:57:46,104 compressor [INFO] Compressing 86th batch
+2024-09-11 20:57:46,105 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:46,105 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:46,753 compressor [INFO] Returned 430 bytes
+2024-09-11 20:57:46,753 compressor [INFO] Required 3 padding bits
+2024-09-11 20:57:46,753 compressor [INFO] Compressing 87th batch
+2024-09-11 20:57:46,754 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:46,754 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:47,401 compressor [INFO] Returned 428 bytes
+2024-09-11 20:57:47,401 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:47,401 compressor [INFO] Compressing 88th batch
+2024-09-11 20:57:47,402 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:47,402 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:48,039 compressor [INFO] Returned 433 bytes
+2024-09-11 20:57:48,039 compressor [INFO] Required 7 padding bits
+2024-09-11 20:57:48,039 compressor [INFO] Compressing 89th batch
+2024-09-11 20:57:48,040 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:48,040 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:48,688 compressor [INFO] Returned 432 bytes
+2024-09-11 20:57:48,688 compressor [INFO] Required 0 padding bits
+2024-09-11 20:57:48,689 compressor [INFO] Compressing 90th batch
+2024-09-11 20:57:48,689 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:48,689 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:49,561 compressor [INFO] Returned 433 bytes
+2024-09-11 20:57:49,562 compressor [INFO] Required 4 padding bits
+2024-09-11 20:57:49,562 compressor [INFO] Compressing 91th batch
+2024-09-11 20:57:49,562 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:49,562 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:50,207 compressor [INFO] Returned 431 bytes
+2024-09-11 20:57:50,208 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:50,208 compressor [INFO] Compressing 92th batch
+2024-09-11 20:57:50,208 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:50,208 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:50,851 compressor [INFO] Returned 428 bytes
+2024-09-11 20:57:50,851 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:50,851 compressor [INFO] Compressing 93th batch
+2024-09-11 20:57:50,852 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:50,852 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:51,500 compressor [INFO] Returned 425 bytes
+2024-09-11 20:57:51,501 compressor [INFO] Required 1 padding bits
+2024-09-11 20:57:51,501 compressor [INFO] Compressing 94th batch
+2024-09-11 20:57:51,501 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:51,502 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:52,147 compressor [INFO] Returned 422 bytes
+2024-09-11 20:57:52,147 compressor [INFO] Required 2 padding bits
+2024-09-11 20:57:52,147 compressor [INFO] Compressing 95th batch
+2024-09-11 20:57:52,148 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:52,148 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:52,796 compressor [INFO] Returned 421 bytes
+2024-09-11 20:57:52,796 compressor [INFO] Required 5 padding bits
+2024-09-11 20:57:52,796 compressor [INFO] Compressing 96th batch
+2024-09-11 20:57:52,797 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:52,797 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:53,443 compressor [INFO] Returned 424 bytes
+2024-09-11 20:57:53,444 compressor [INFO] Required 4 padding bits
+2024-09-11 20:57:53,444 compressor [INFO] Compressing 97th batch
+2024-09-11 20:57:53,444 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:53,445 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:54,096 compressor [INFO] Returned 426 bytes
+2024-09-11 20:57:54,096 compressor [INFO] Required 7 padding bits
+2024-09-11 20:57:54,096 compressor [INFO] Compressing 98th batch
+2024-09-11 20:57:54,097 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:54,097 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:54,745 compressor [INFO] Returned 430 bytes
+2024-09-11 20:57:54,745 compressor [INFO] Required 0 padding bits
+2024-09-11 20:57:54,745 compressor [INFO] Compressing 99th batch
+2024-09-11 20:57:54,746 language_model [INFO] Initialising btransformer compression
+2024-09-11 20:57:54,746 language_model [INFO] Length of data is: 512
+2024-09-11 20:57:55,394 compressor [INFO] Returned 428 bytes
+2024-09-11 20:57:55,394 compressor [INFO] Required 5 padding bits
+2024-09-11 20:57:55,395 root [INFO] Compressor ran with rate=0.9787890625 and time=70.12128661604947

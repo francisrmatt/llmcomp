@@ -89,7 +89,7 @@ def train():
         config = config,
         training_steps = int(args.amt),
         cw = info['cw'],
-        log_every = int(args.amt)//10,
+        log_every = int(args.amt)//100,
         batch_size = info['bs'],
         use_tqdm = not args.shh,
     )
@@ -201,6 +201,7 @@ def compress():
                                                 config = config,
                                                 data = data,
                                                 mask_fn = mask_fn,
+                                                #mask_fn = None, #TEMP
                                                 )
 
     logger.info(f'Compressor ran with {rate=} and {time=}') 

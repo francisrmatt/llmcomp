@@ -126,6 +126,7 @@ def evaluate_compressor(
   kld_sum = 0
   for i, datum in enumerate(data):
     # Get stats for context_l and n_chunks
+
     len_data += 1
     len_datum = len(datum)
 

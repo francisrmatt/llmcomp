@@ -9,6 +9,7 @@ import pandas as pd
 import math
 import os
 import pickle
+from scipy.stats import norm
 
 import haiku as hk
 import numpy as np
@@ -59,6 +60,41 @@ def _retrieve_predict_fn(
 # Needs to be replaced with its own thing TODO
 def _get_llama():
     return functools.partial(llama.llama.llama_completion_fn, settings = constants.LLAMA_CONFIG)
+
+def get_scaled_input(data_in):
+
+  minx = min(data_in[0][0:-1])
+  maxx = max(data_in[0][0:-1])
+  return (((data_in.astype(np.uint32) - minx) * 127) // (maxx-minx)).astype(np.uint8)
+
+def scale_pdf(pdf, a, b, sigma):
+
+  # Create a new array to hold the transformed probabilities
+  transformed_distribution = np.zeros(128)
+  
+  # Calculate the mean of the original distribution
+  
+  # Iterate over the original distribution
+  for x in range(128):
+      if pdf[x] > 0:
+          # Scale to the new range
+          y = (x / 127) * (b - a) + a
+          
+          # Calculate the Gaussian kernel
+          kernel = norm.pdf(np.arange(128), loc=y, scale=sigma)
+          
+          # Update the transformed distribution
+          transformed_distribution += pdf[x] * kernel
+  
+  # Normalize the transformed distribution
+  transformed_distribution /= np.sum(transformed_distribution)
+  
+  # Zero out values outside the new range [a, b]
+  transformed_distribution[:a] = 0
+  transformed_distribution[b:] = 0
+
+  return transformed_distribution
+
 
 def compress_smooth(
     data: bytes,
@@ -117,17 +153,34 @@ def compress_smooth(
 
   total_b = 0
   compressed_b = 0
-  for offset in range(len(sequence_array)):
+
+  # Implement mRF 
+
+  for offset in range(256, len(sequence_array)):
+
+    siq = sequence_array[None, max(0, offset - info['cw']): offset + 1].copy()  
+    ssiq = get_scaled_input(siq)
 
     subsequence_probs = predict_fn(
-        sequence_array[None, max(0, offset - info['cw']): offset + 1] 
+      ssiq
     )
-
-    # Update post-hoc statistics
-
     symbol = sequence_array[offset]
     probs = np.exp(subsequence_probs[0, -1])
-    nprobs = utils.normalize_pdf_for_arithmetic_coding(probs)
+
+    # Change distribution
+    nprobs = scale_pdf(probs, min(siq[0][0:-1]), max(siq[0][0:-1]), 1)
+    nprobs = utils.normalize_pdf_for_arithmetic_coding(nprobs)
+
+    # sanity
+    plt.figure()
+    plt.plot(probs)
+    plt.savefig('figs/tmp/vprobs.png')
+    plt.close()
+    plt.figure()
+    plt.plot(nprobs)
+    plt.savefig('figs/tmp/nprobs.png')
+    plt.close()
+
 
     # Calculate the Kullback-Leibler (KL) divergence
     kld_sum += np.sum(

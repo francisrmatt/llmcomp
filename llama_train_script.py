@@ -26,9 +26,21 @@ import os
 import sys
 
 # Need to make sure we are JUST using on GPU
-if int(os.environ['CUDA_VISIBLE_DEVICES']) != 0:
-    print('CAN ONLY TRAIN ON 1 GPU')
-    sys.exit(-1)
+#if int(os.environ['CUDA_VISIBLE_DEVICES']) != 0:
+#    print('CAN ONLY TRAIN ON 1 GPU')
+#    sys.exit(-1)
+
+def setup_device():
+    # Initialize the process group
+    torch.distributed.init_process_group(backend='nccl')
+
+    # Set the device for this process
+    local_rank = torch.distributed.get_rank()
+    torch.cuda.set_device(local_rank)
+    device = f'cuda:{local_rank}'
+    return local_rank, device
+
+local_rank, device = setup_device()
 
 model_path = "meta-llama/Llama-2-7b-hf"
 #train_batch_size = 2
@@ -66,7 +78,7 @@ data = audioop.bias(biased, 1, 2**7)
 ndata = np.frombuffer(data, dtype = np.uint8)
 data = np.right_shift(ndata, 1)
 data_split = sliding_window_view(data, 257)
-d = data_split[np.random.choice(data_split.shape[0], 10000, replace=False), :]
+d = data_split[np.random.choice(data_split.shape[0], 1000000, replace=False), :]
 
 inputs = d[:, :256] 
 targets = d[:, 256:]
@@ -155,7 +167,8 @@ model = load_headed(
     model_name=model_path,
     quantization_config=quantization_config,
     head_configs=head_configs,
-    device_map='auto'#{"": torch.cuda.current_device()},
+    #device_map='auto'#{"": torch.cuda.current_device()},
+    device_map={"": torch.cuda.current_device()},
 )
 
 collator = DataCollatorWithPadding(
@@ -171,15 +184,30 @@ train_epochs = 1
 eval_epochs = 1
 logging_steps = 100
 
+#args = TrainingArguments(
+#    output_dir="linear_probe_test",
+#    learning_rate=0.0002,
+#    num_train_epochs=train_epochs,
+#    logging_steps=logging_steps,
+#    do_eval=False,
+#    remove_unused_columns=False,  # Important to set to False, otherwise things will fail
+#    auto_find_batch_size=True,
+#    fp16=True,
+#)
 args = TrainingArguments(
-    output_dir="linear_probe_test",
-    learning_rate=0.0002,
-    num_train_epochs=train_epochs,
-    logging_steps=logging_steps,
-    do_eval=False,
-    remove_unused_columns=False,  # Important to set to False, otherwise things will fail
-    auto_find_batch_size=True,
-    fp16=True,
+    output_dir='test-multigpu',
+    fp16 = True,
+    #auto_find_batch_size = True,
+    remove_unused_columns = False,
+    per_device_train_batch_size=32,  # Adjust as necessary
+    #per_device_eval_batch_size=8,
+    do_eval = False,
+    num_train_epochs=1,
+    logging_dir='./logs',
+    logging_steps=10,
+    dataloader_num_workers=4,
+    # Enable DDP
+    local_rank=local_rank,  # Pass the local rank for DDP
 )
 
 trainer = Trainer(
@@ -189,5 +217,8 @@ trainer = Trainer(
     data_collator=collator,
 )
 trainer.train()
+
+if local_rank == 0:
+    model.save_pretrained("test_model_multigpu_bigtrain")
 
 print('done')

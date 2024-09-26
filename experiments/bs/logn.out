@@ -1,0 +1,91 @@
+2024-09-19 16:08:02,787 root [INFO] ---- BEGINNING TRAINING ----
+2024-09-19 16:08:02,789 root [INFO] New parameters
+2024-09-19 16:08:02,789 root [INFO] Training with an extra 5000000 steps with batch size 1
+2024-09-19 16:08:02,789 root [INFO] Parameters for transformer are config=TransformerConfig(vocab_size=128, embedding_dim=64, num_layers=16, num_heads=8, emb_init_scale=0.02, widening_factor=8)
+2024-09-19 16:08:15,107 btransformer.train [INFO] Fetching random batch for fresh run
+2024-09-19 16:08:16.709053: W external/xla/xla/service/gpu/nvptx_compiler.cc:836] The NVIDIA driver's CUDA version is 12.2 which is older than the PTX compiler version (12.6.20). Because the driver is older than the PTX compiler version, XLA is disabling parallel compilation, which may slow down compilation. You should update your NVIDIA driver or use the NVIDIA-provided CUDA forward compatibility packages.
+2024-09-19 16:08:24,111 btransformer.train [INFO] Initialization done, starting training...
+2024-09-19 16:08:45,404 btransformer.train [INFO] Step 0.000000, Loss 1335.264648, Grad norm 7.390431
+2024-09-19 17:34:03,649 btransformer.train [INFO] Step 500000.000000, Loss 580.463867, Grad norm 10.060711
+2024-09-19 18:56:21,057 btransformer.train [INFO] Step 1000000.000000, Loss 1113.367676, Grad norm 1.467729
+2024-09-19 20:18:42,554 btransformer.train [INFO] Step 1500000.000000, Loss 1070.457886, Grad norm 1.113733
+2024-09-19 21:40:43,248 btransformer.train [INFO] Step 2000000.000000, Loss 638.363892, Grad norm 8.117528
+2024-09-19 23:01:39,527 btransformer.train [INFO] Step 2500000.000000, Loss 1102.471436, Grad norm 1.676336
+2024-09-20 00:22:50,534 btransformer.train [INFO] Step 3000000.000000, Loss 1067.289307, Grad norm 1.346412
+2024-09-20 01:44:31,243 btransformer.train [INFO] Step 3500000.000000, Loss 835.344482, Grad norm 7.233712
+2024-09-20 03:05:29,521 btransformer.train [INFO] Step 4000000.000000, Loss 1065.957031, Grad norm 2.726156
+2024-09-20 04:30:41,542 btransformer.train [INFO] Step 4500000.000000, Loss 1058.513916, Grad norm 2.682024
+2024-09-20 05:54:21,501 root [INFO] 5000000 training run complete (total 5000000) in 49578.710535346996 seconds with loss 1093.669677734375
+2024-09-20 05:54:21,552 root [INFO] Saved params in params/bs_01/params.npz file
+n_files=100
+2024-09-20 05:54:26,790 root [INFO] ---- BEGINNING TRAINING ----
+2024-09-20 05:54:26,792 root [INFO] New parameters
+2024-09-20 05:54:26,792 root [INFO] Training with an extra 1000000 steps with batch size 5
+2024-09-20 05:54:26,792 root [INFO] Parameters for transformer are config=TransformerConfig(vocab_size=128, embedding_dim=64, num_layers=16, num_heads=8, emb_init_scale=0.02, widening_factor=8)
+2024-09-20 05:54:39,069 btransformer.train [INFO] Fetching random batch for fresh run
+2024-09-20 05:54:40.528426: W external/xla/xla/service/gpu/nvptx_compiler.cc:836] The NVIDIA driver's CUDA version is 12.2 which is older than the PTX compiler version (12.6.20). Because the driver is older than the PTX compiler version, XLA is disabling parallel compilation, which may slow down compilation. You should update your NVIDIA driver or use the NVIDIA-provided CUDA forward compatibility packages.
+2024-09-20 05:54:48,332 btransformer.train [INFO] Initialization done, starting training...
+2024-09-20 05:55:10,827 btransformer.train [INFO] Step 0.000000, Loss 1350.487793, Grad norm 5.841250
+2024-09-20 06:11:22,559 btransformer.train [INFO] Step 100000.000000, Loss 1036.534058, Grad norm 7.156637
+2024-09-20 06:27:15,985 btransformer.train [INFO] Step 200000.000000, Loss 991.188782, Grad norm 5.539361
+2024-09-20 06:43:05,097 btransformer.train [INFO] Step 300000.000000, Loss 992.165527, Grad norm 6.483640
+2024-09-20 06:58:58,390 btransformer.train [INFO] Step 400000.000000, Loss 862.146179, Grad norm 4.430208
+2024-09-20 07:14:48,425 btransformer.train [INFO] Step 500000.000000, Loss nan, Grad norm 2.692020
+2024-09-20 07:30:35,065 btransformer.train [INFO] Step 600000.000000, Loss nan, Grad norm 5.123713
+2024-09-20 07:46:27,972 btransformer.train [INFO] Step 700000.000000, Loss 1082.265625, Grad norm 0.982619
+2024-09-20 08:02:23,771 btransformer.train [INFO] Step 800000.000000, Loss nan, Grad norm 2.203444
+2024-09-20 08:18:25,246 btransformer.train [INFO] Step 900000.000000, Loss 974.139465, Grad norm 2.421404
+2024-09-20 08:34:08,038 root [INFO] 1000000 training run complete (total 1000000) in 9581.245114230987 seconds with loss 864.02734375
+2024-09-20 08:34:08,086 root [INFO] Saved params in params/bs_02/params.npz file
+n_files=100
+2024-09-20 08:34:13,365 root [INFO] ---- BEGINNING TRAINING ----
+2024-09-20 08:34:13,366 root [INFO] New parameters
+2024-09-20 08:34:13,366 root [INFO] Training with an extra 500000--shh steps with batch size 10
+2024-09-20 08:34:13,367 root [INFO] Parameters for transformer are config=TransformerConfig(vocab_size=128, embedding_dim=64, num_layers=16, num_heads=8, emb_init_scale=0.02, widening_factor=8)
+Traceback (most recent call last):
+  File "/home/mattf/llmcomp/go.py", line 254, in <module>
+    train()
+  File "/home/mattf/llmcomp/go.py", line 90, in train
+    training_steps = int(args.amt),
+                     ^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: '500000--shh'
+2024-09-20 08:34:18,315 root [INFO] ---- BEGINNING TRAINING ----
+2024-09-20 08:34:18,316 root [INFO] New parameters
+2024-09-20 08:34:18,316 root [INFO] Training with an extra 250000 steps with batch size 20
+2024-09-20 08:34:18,316 root [INFO] Parameters for transformer are config=TransformerConfig(vocab_size=128, embedding_dim=64, num_layers=16, num_heads=8, emb_init_scale=0.02, widening_factor=8)
+2024-09-20 08:34:30,653 btransformer.train [INFO] Fetching random batch for fresh run
+2024-09-20 08:34:32.236174: W external/xla/xla/service/gpu/nvptx_compiler.cc:836] The NVIDIA driver's CUDA version is 12.2 which is older than the PTX compiler version (12.6.20). Because the driver is older than the PTX compiler version, XLA is disabling parallel compilation, which may slow down compilation. You should update your NVIDIA driver or use the NVIDIA-provided CUDA forward compatibility packages.
+2024-09-20 08:34:39,857 btransformer.train [INFO] Initialization done, starting training...
+2024-09-20 08:35:04,924 btransformer.train [INFO] Step 0.000000, Loss 1358.943359, Grad norm 5.961576
+2024-09-20 08:44:42,535 btransformer.train [INFO] Step 25000.000000, Loss nan, Grad norm 0.727884
+2024-09-20 08:54:11,372 btransformer.train [INFO] Step 50000.000000, Loss nan, Grad norm 2.626316
+2024-09-20 09:03:39,718 btransformer.train [INFO] Step 75000.000000, Loss nan, Grad norm 7.215016
+2024-09-20 09:13:22,102 btransformer.train [INFO] Step 100000.000000, Loss nan, Grad norm 10.589693
+2024-09-20 09:23:04,570 btransformer.train [INFO] Step 125000.000000, Loss 962.249451, Grad norm 3.845416
+2024-09-20 09:32:37,748 btransformer.train [INFO] Step 150000.000000, Loss 1000.468384, Grad norm 2.848775
+2024-09-20 09:42:05,944 btransformer.train [INFO] Step 175000.000000, Loss 896.831055, Grad norm 7.695770
+2024-09-20 09:51:41,859 btransformer.train [INFO] Step 200000.000000, Loss nan, Grad norm 3.663386
+2024-09-20 10:01:15,344 btransformer.train [INFO] Step 225000.000000, Loss 987.395691, Grad norm 6.917418
+2024-09-20 10:10:45,257 root [INFO] 250000 training run complete (total 250000) in 5786.939955048991 seconds with loss 894.44189453125
+2024-09-20 10:10:45,309 root [INFO] Saved params in params/bs_04/params.npz file
+n_files=100
+2024-09-20 10:10:50,689 root [INFO] ---- BEGINNING TRAINING ----
+2024-09-20 10:10:50,690 root [INFO] New parameters
+2024-09-20 10:10:50,690 root [INFO] Training with an extra 100000 steps with batch size 50
+2024-09-20 10:10:50,690 root [INFO] Parameters for transformer are config=TransformerConfig(vocab_size=128, embedding_dim=64, num_layers=16, num_heads=8, emb_init_scale=0.02, widening_factor=8)
+2024-09-20 10:11:03,044 btransformer.train [INFO] Fetching random batch for fresh run
+2024-09-20 10:11:04.403365: W external/xla/xla/service/gpu/nvptx_compiler.cc:836] The NVIDIA driver's CUDA version is 12.2 which is older than the PTX compiler version (12.6.20). Because the driver is older than the PTX compiler version, XLA is disabling parallel compilation, which may slow down compilation. You should update your NVIDIA driver or use the NVIDIA-provided CUDA forward compatibility packages.
+2024-09-20 10:11:12,259 btransformer.train [INFO] Initialization done, starting training...
+2024-09-20 10:11:37,200 btransformer.train [INFO] Step 0.000000, Loss 1357.227661, Grad norm 6.163605
+2024-09-20 10:20:20,169 btransformer.train [INFO] Step 10000.000000, Loss nan, Grad norm 0.488892
+2024-09-20 10:29:01,786 btransformer.train [INFO] Step 20000.000000, Loss nan, Grad norm 1.449530
+2024-09-20 10:37:33,929 btransformer.train [INFO] Step 30000.000000, Loss 1050.247681, Grad norm 2.610946
+2024-09-20 10:46:04,832 btransformer.train [INFO] Step 40000.000000, Loss nan, Grad norm 5.443989
+2024-09-20 10:54:43,430 btransformer.train [INFO] Step 50000.000000, Loss nan, Grad norm 4.557177
+2024-09-20 11:03:23,847 btransformer.train [INFO] Step 60000.000000, Loss nan, Grad norm 7.366868
+2024-09-20 11:11:55,188 btransformer.train [INFO] Step 70000.000000, Loss nan, Grad norm 7.230659
+2024-09-20 11:20:25,700 btransformer.train [INFO] Step 80000.000000, Loss 996.872192, Grad norm 3.667667
+2024-09-20 11:28:59,526 btransformer.train [INFO] Step 90000.000000, Loss nan, Grad norm 6.530227
+2024-09-20 11:37:32,359 root [INFO] 100000 training run complete (total 100000) in 5201.6671934869955 seconds with loss 944.7412109375
+2024-09-20 11:37:32,418 root [INFO] Saved params in params/bs_05/params.npz file
+n_files=100

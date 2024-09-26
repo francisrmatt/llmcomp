@@ -31,7 +31,7 @@ with open('compressed_llama.data', 'rb') as f:
     d = f.read()
 
 import sys
-data_iter = iter(utils.bytes_to_bits(d, num_padded_bits=1))
+data_iter = iter(utils.bytes_to_bits(d, num_padded_bits=7))
 
 from typing import Iterator
 def _input_fn(bit_sequence: Iterator[str] = data_iter) -> int | None:

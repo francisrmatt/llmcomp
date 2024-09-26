@@ -163,16 +163,21 @@ def train_transformer_decoder(
       functools.partial(transformer.transformer_decoder, config=config)
   )
 
-  data_generator = get_data.fetch(
-      stream_mode = False,
-      amt = 0, # Doesn't matter
-      context_window = cw,
-      filename = -1, # all
-      scale = 1,
-      offset = 0,
-  )
+  # Temporarily replace with the pretrained
+
+  data_generator = get_data.fetch_preprocessed('c256')
+
+  #data_generator = get_data.fetch(
+  #    stream_mode = False,
+  #    amt = 0, # Doesn't matter
+  #    context_window = cw,
+  #    filename = -1, # all
+  #    scale = 1,
+  #    offset = 0,
+  #)
 
   dataset = list(data_generator)
+
 
   def fetch_random_batch() -> np.ndarray:
     batch_list = random.choices(dataset, k=batch_size)
@@ -180,7 +185,7 @@ def train_transformer_decoder(
     if config.vocab_size == 128:
       batch_list = np.right_shift(batch_list, 1)
     # Add noise
-    batch_list = batch_list + np.random.normal(0,2,batch_list.shape).astype(np.uint8)
+    #batch_list = batch_list + np.random.normal(0,2,batch_list.shape).astype(np.uint8)
     return np.array(batch_list, dtype=np.uint8)
 
   if new_train:

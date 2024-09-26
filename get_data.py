@@ -11,6 +11,34 @@ import constants
 
 import matplotlib.pyplot as plt
 
+def our_norm(x):
+    maxx = max(x)
+    minx = min(x)
+    old_range = maxx - minx
+    new_range = 127
+    nx = [(((o - minx) * new_range) // old_range) for o in x]
+    return bytes(nx)
+
+def fetch_preprocessed(
+            which: str, 
+            ) -> Generator [any, any, any]:
+
+    # Logging config
+    logging.config.dictConfig(constants.LOGGING_CONFIG)
+    logger = logging.getLogger(__name__) 
+    
+    logger.debug(f'Fetching preprocessed data {which}')
+
+    with np.load(f'data/chunked_data/{which}/data0.npz', allow_pickle=True) as f:
+          d = f['dat'].astype(np.uint8)
+
+    for i in range(1,100):
+        logger.debug(f'Fetching {i}th data')
+        with np.load(f'data/chunked_data/{which}/data{i}.npz', allow_pickle=True) as f:
+            d = np.vstack((d, f['dat'].astype(np.uint8)))
+
+    return map(lambda x: x.tobytes(), d.astype(np.uint8))
+
 
 def fetch(stream_mode : bool,
           amt : int, # number of chunks for non stream and length of stream for stream
@@ -92,6 +120,7 @@ def fetch(stream_mode : bool,
         if map_fn is not None:
             return map(map_fn, patches)
 
+        #return map(lambda patch: our_norm(patch), patches)
         return map(lambda patch: patch.tobytes(), patches)
 
     idx = 0
