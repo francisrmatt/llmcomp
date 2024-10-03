@@ -8,6 +8,7 @@ import os
 import sys
 from numpy.lib.stride_tricks import sliding_window_view
 import constants
+import random
 
 import matplotlib.pyplot as plt
 
@@ -48,6 +49,8 @@ def fetch(stream_mode : bool,
           offset: int = 0,
           map_fn: Callable = None,
           rchunks : bool = False,
+          noise : float = None, # None for no noise otherwise the standard deviation of noise
+          random_order: bool = None,
           ) -> Generator[any, any, any]:
     """Returns chunks of float data which are fetched from wifi data
 
@@ -82,15 +85,19 @@ def fetch(stream_mode : bool,
         data = np.fromfile('data/raw_data/w0.data', np.int16)
         for i in range(1, n_files - 1):
             data = np.append(data, np.fromfile('data/raw_data/w{}.data'.format(i), np.int16))
-    elif filename == -2: # Test file is -2
-        logger.debug(f'Loading test file with offset {offset}')
-        data = np.fromfile('data/test/w_test.data', np.int16)
+    elif filename <=-2: # Test file is -2
+        logger.debug(f'Loading {-filename - 2}th test file with offset {offset}')
+        data = np.fromfile(f'data/test/t{- filename - 2}.data', np.int16)
+
         logger.debug(f'Ofsetting by {offset}')
         data = data[offset:]
     else:
         logger.debug(f'Loading from file {filename} with offset {offset}')
         data = np.fromfile('data/raw_data/w{}.data'.format(filename), np.int16)
         data = data[offset:]
+
+    if noise is not None:
+        data = data + np.random.normal(0,noise,data.shape).astype(np.int16)
 
 
     data_iq = data[0::2] + 1j*data[1::2]
@@ -105,11 +112,17 @@ def fetch(stream_mode : bool,
     def _extract_rf_slide(sample: bytes):
         x = np.frombuffer(sample, dtype = np.uint8)
         if rchunks:
+            logger.debug(f'rchunks true, doing array_split')
             patches = np.array_split(x,
                 range(
                     context_window,
                     len(sample),
                     context_window,))
+
+            if random_order:
+                logger.debug(f'Randomly shuffling split array')
+                random.shuffle(patches)
+
 
         else:
             patches = sliding_window_view(x, context_window)

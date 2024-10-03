@@ -155,7 +155,7 @@ def evaluate_compressor(
     compressed_length += len(compressed_data)
 
   fc = len_datum * len_data
-  kld = kld_sum/i
+  kld = kld_sum/(i+1)
   logger.info(f'Average KLD was {kld}')
   # Since language models are trained on ASCII strings, they cannot handle all
   # byte values. Thus, we mask the data to be ASCII-decodable by zeroing
@@ -163,9 +163,20 @@ def evaluate_compressor(
   # are effectively only compressing `num_bits - num_missed_bits` bits, so we
   # rescale the `compressed_length` to account for this.
 
+  # If we use the smooth compressor we need to subtract 
+  import yaml
+  with open(f'params/{params}/info.yml', 'r') as f:
+    info = yaml.safe_load(f)
+
+  # Only if we offset
+  if compress_fn_name == 'btransformer_smooth':
+    raw_length -= info['cw']
+    fc -= info['cw']
+
   if mask_fn is not None:
     # Add one bit per missed bit, round up to nearest 8
     compressed_length += int(math.ceil(fc / 8.0)) 
+
 
   # We only count the header once for classical compressors.
   if compress_fn_name == 'gzip':

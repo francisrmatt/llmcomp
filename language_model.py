@@ -156,19 +156,22 @@ def compress_smooth(
 
   # Implement mRF 
 
-  for offset in range(256, len(sequence_array)):
+  #for offset in range(info['cw'], len(sequence_array)):
+  for offset in range(len(sequence_array)):
 
     siq = sequence_array[None, max(0, offset - info['cw']): offset + 1].copy()  
-    ssiq = get_scaled_input(siq)
+    #ssiq = get_scaled_input(siq)
 
     subsequence_probs = predict_fn(
-      ssiq
+      #ssiq
+      siq
     )
     symbol = sequence_array[offset]
     probs = np.exp(subsequence_probs[0, -1])
 
     # Change distribution
-    nprobs = scale_pdf(probs, min(siq[0][0:-1]), max(siq[0][0:-1]), 1)
+    #nprobs = scale_pdf(probs, min(siq[0][0:-1]), max(siq[0][0:-1]), 1)
+    nprobs = probs
     nprobs = utils.normalize_pdf_for_arithmetic_coding(nprobs)
 
     # sanity
@@ -183,9 +186,11 @@ def compress_smooth(
 
 
     # Calculate the Kullback-Leibler (KL) divergence
-    kld_sum += np.sum(
-      training_dist * np.log2(training_dist/nprobs)
-    )
+    kld_sum += 1
+    
+    ##np.sum(
+    #  training_dist * np.log2(training_dist/nprobs)
+    #)
 
     pdf_q.append(nprobs)
     sequence_q.append(symbol)
@@ -197,18 +202,19 @@ def compress_smooth(
     indicator = np.array([0 if idx < symbol else 1 for idx in range(len(cdf))])
     crps = np.sum((cdf-indicator)**2)
     crps_q.append(crps)
-    #fig, ax = plt.subplots()
-    #plt.plot(cdf2, label = 'CDF Square Adjustment')
-    #plt.plot(cdf, label = 'CDF')
-    #plt.plot(indicator, label = 'Correct symbol')
-    #ax.fill_between(np.arange(0,info['vocab_size']), np.maximum(cdf2, indicator), np.minimum(cdf2, indicator), color="crimson", alpha=0.4)
-    #plt.text(0.1, 0.5, f'CRPS = {crps:.02f}')
-    #plt.legend()
-    #plt.title('CRPS Graph')
-    #plt.xlabel('Symbol value')
-    #plt.ylabel('Density')
-    #plt.savefig('figs/tmp/crps_smooth.png')
-    #plt.close()
+    if do_fig:
+      fig, ax = plt.subplots()
+      plt.plot(cdf2, label = 'CDF Square Adjustment')
+      plt.plot(cdf, label = 'CDF')
+      plt.plot(indicator, label = 'Correct symbol')
+      ax.fill_between(np.arange(0,info['vocab_size']), np.maximum(cdf2, indicator), np.minimum(cdf2, indicator), color="crimson", alpha=0.4)
+      plt.text(0.1, 0.5, f'CRPS = {crps:.02f}')
+      plt.legend()
+      plt.title('CRPS Graph')
+      plt.xlabel('Symbol value')
+      plt.ylabel('Density')
+      plt.savefig('figs/tmp/crps_smooth.png')
+      plt.close()
 
     compressed_bits = ''.join(map(str, output))
     n_bits = len(compressed_bits) - prev_len
@@ -254,7 +260,7 @@ def compress_smooth(
   logger.info(f'Average KLD was {kld_sum/len(sequence_array)}')
 
   if return_num_padded_bits:
-    return compressed_bytes, num_padded_bits
+    return compressed_bytes, num_padded_bits, kld_sum
 
   return compressed_bytes
 

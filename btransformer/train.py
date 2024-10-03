@@ -32,6 +32,7 @@ import constants
 import get_data
 from btransformer import transformer
 import utils
+import matplotlib.pyplot as plt
 
 
 def _to_marginals(
@@ -39,11 +40,20 @@ def _to_marginals(
     sequences: jax.Array,
 ) -> jax.Array:
   """Converts a conditional array to a marginals array."""
+  #jax.debug.print('predictions -> {predictions}', predictions = predictions)
+  #jax.debug.print('predictions shape -> {predictions}', predictions = jnp.shape(predictions))
+  #jax.debug.print('sequences -> {sequences}', sequences = sequences)
+
+  # This only takes the first of the batch
+  last_row = predictions[0,-1,:]
+
   true_predictions = jnp.take_along_axis(
       predictions, sequences[..., None], axis=-1
   )
   true_predictions = true_predictions[..., 0]  # Shape (B, T).
-  return jnp.sum(true_predictions, axis=1)  # Shape (B,).
+
+  #jax.debug.print('true predictions-> {x}', x= true_predictions)
+  return jnp.sum(true_predictions, axis=1), last_row  # Shape (B,).
 
 
 def _make_loss_fn(model: hk.Transformed) -> Any:
@@ -64,8 +74,8 @@ def _make_loss_fn(model: hk.Transformed) -> Any:
         targets=sequences,
         rng=None,
     )
-    marginals = _to_marginals(conditionals, sequences)
-    return -jnp.mean(marginals)
+    marginals, final_row = _to_marginals(conditionals, sequences)
+    return -jnp.mean(marginals), final_row
 
   return loss_fn
 
@@ -98,7 +108,8 @@ def _update_parameters(
       sequences, or keep them as is. Using this option guarantees to have the
       same scale across various sequence lengths, and therefore tasks.
   """
-  loss, grad = grad_fn(params, sequences)
+  (loss, last_row), grad = grad_fn(params, sequences)
+  #jax.debug.print('last row is {x}', x = last_row)
   if normalize_gradients:
     length_sequence = float(sequences.shape[1])
     grad = tree.map_structure(lambda x: x / length_sequence, grad)
@@ -108,6 +119,7 @@ def _update_parameters(
   log_dict = {
       'loss': loss,
       'grad_norm_unclipped': optax.global_norm(grad),
+      'latest_prob_dist' : last_row
   }
 
   return new_params, new_opt_state, log_dict
@@ -165,19 +177,18 @@ def train_transformer_decoder(
 
   # Temporarily replace with the pretrained
 
-  data_generator = get_data.fetch_preprocessed('c256')
+  #data_generator = get_data.fetch_preprocessed('c256')
 
-  #data_generator = get_data.fetch(
-  #    stream_mode = False,
-  #    amt = 0, # Doesn't matter
-  #    context_window = cw,
-  #    filename = -1, # all
-  #    scale = 1,
-  #    offset = 0,
-  #)
+  data_generator = get_data.fetch(
+    stream_mode = False,
+    amt = 0, # Doesn't matter
+    context_window = cw,
+    filename = -1, # all
+    scale = 1,
+    offset = 0,
+  )
 
   dataset = list(data_generator)
-
 
   def fetch_random_batch() -> np.ndarray:
     batch_list = random.choices(dataset, k=batch_size)
@@ -201,7 +212,7 @@ def train_transformer_decoder(
 
   # Make gradient function.
   loss_fn = _make_loss_fn(model)
-  grad_fn = jax.value_and_grad(loss_fn, has_aux=False)
+  grad_fn = jax.value_and_grad(loss_fn, has_aux=True) # Changed to true so we can return last row
 
   # Make optimizer, to apply the gradients.
   optimizer = optax.adam(learning_rate=1e-5)
@@ -209,9 +220,23 @@ def train_transformer_decoder(
 
   logger.info('Initialization done, starting training...')
   last_loss = 0.0
+
+  # Create batch histogram, assumes 128 alphabet size
+  data_histogram = np.zeros(128, dtype = np.float32)
+
+  # KLD store
+  kld_av_store = list()
+  kld_sum = 0
+  kld_count = 0
+  alpha = 0.9 # smoothing factor
+
   for step in tqdm.trange(training_steps, disable=not use_tqdm):
     batch = fetch_random_batch()
     #logger.info('Batch fetched.')
+
+    # Update data histogram
+    unique, counts = np.unique(batch, return_counts=True)
+    data_histogram[unique] += counts
 
     params, opt_state, logs = _update_parameters(
         params=params,
@@ -221,13 +246,52 @@ def train_transformer_decoder(
         optimizer=optimizer,
     )
     if log_every > 0 and step % log_every == 0:
+      # Graph KL divergence
+      q = logs['latest_prob_dist']
+      q = jnp.exp(q)
+      q = utils.normalize_pdf_for_arithmetic_coding(q)
+      p = utils.normalize_pdf_for_arithmetic_coding(data_histogram)
+      epsilon = 1e-10
+      p = p + epsilon
+      q = q + epsilon
+
+      #kld_count += 1
+      kld = jnp.sum(p * np.log(p / q))
+      if len(kld_av_store) == 0:
+        kld_av_store.append(kld)
+      else:
+        kld_av_store.append(alpha * kld_av_store[-1] + (1-alpha) * kld)
+
+
+      # Plot to watch
+      if len(kld_av_store) > 101:
+        plt.figure()
+        plt.plot(kld_av_store[-100:])
+        plt.savefig('figs/tmp/kld_store.png')
+        plt.close()
+
+      plt.figure()
+      plt.plot(p)
+      plt.savefig('figs/tmp/p_store.png')
+      plt.close()
+
+      plt.figure()
+      plt.plot(q)
+      plt.savefig('figs/tmp/q_store.png')
+      plt.close()
+
       logger.info(
-          'Step %f, Loss %f, Grad norm %f',
+          'Step %f, Loss %f, Grad norm %f KLD %f',
           step,
           logs['loss'],
           logs['grad_norm_unclipped'],
+          kld,
       )
+
     last_loss = logs['loss']
+
+
+
 
   return params, last_loss
 

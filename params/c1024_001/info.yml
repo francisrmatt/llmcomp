@@ -1,4 +1,3 @@
-model: btransformer
 cw: 1024
 bs: 25
 lr: 1e-5

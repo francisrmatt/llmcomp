@@ -2,8 +2,13 @@
 
 import sys
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import numpy as np
+import pandas as pd
+import seaborn as sns
 import yaml
+from tqdm import tqdm
+import pickle
 
 import time
 import constants
@@ -41,12 +46,106 @@ logger = logging.getLogger()
 
 def eval():
     
-    logger.info('--- EVALUATING COMPRESSOR ---') 
+    # Must do a thorough analysis of compressing ability over the ten test sets
+    # Don't forget to do the scaling one but can do that later
+    # Default scenario is test over the 10 different training data 
+    # In this function, amt will be the number of chunks to fetch randomly from each file
 
+    logger.info('--- EVALUATING PARAMETER SET---') 
+
+    # Get the parameter set
     which = args.which
     if not os.path.isdir(f'params/{which}'):
         logger.error(f'{which} is not a valid parameter set, quitting.')
         sys.exit(-1)
+
+    logger.info(f'Evaluating parameter set {which}')
+    with open(f'params/{which}/info.yml', 'r') as f:
+        info = yaml.safe_load(f)
+
+    config = TransformerConfig(
+            vocab_size = info['vocab_size'],
+            embedding_dim = info['embedding_dim'],
+            num_heads = info['num_heads'],
+            num_layers = info['num_layers'],
+            emb_init_scale = info['emb_init_scale'],
+            widening_factor = info['widening_factor'],
+        )
+    cw = info['cw']
+
+    # Strictly not stream
+    logger.info('Model information dump')
+    logger.info(f'{config}')
+
+    # Consider the 10 test files with 10 SNRS from constants file
+    df = pd.DataFrame(
+        columns = [x for x in constants.SNR_SET],
+        index = [x for x in range(constants.NUM_TEST_FILES)],
+    )
+
+    # Now we need to loop over test files AND SNR 
+    for test_file in range(constants.NUM_TEST_FILES):
+        logger.info(f'Considering test file {test_file}')
+
+        for snr_sd, snr_set in zip(constants.SNR_SD, constants.SNR_SET):
+            logger.info(f'Considering SNR {snr_set}')
+
+            data = get_data.fetch(
+                stream_mode = False,
+                amt = int(args.amt),
+                context_window = cw,
+                filename = (-2 - test_file),
+                scale = 1,
+                offset = 0,
+                map_fn = None,
+                rchunks = True,
+                noise = snr_sd
+            )
+
+            mask_fn = None
+            if info['vocab_size'] == 128:
+                mask_fn = utils.right_shift_bytes_by_one
+
+            rate, time = compressor.evaluate_compressor(
+                compress_fn_name = 'btransformer',
+                params = which,
+                config = config,
+                data = data,
+                mask_fn = mask_fn,
+            )
+
+            df.loc[test_file, snr_set] = rate
+
+    print(df)
+
+    # Save pickle file
+    with open(f'params/{which}/df.pkl', 'wb') as f:
+        pickle.dump(df, f)
+
+    ax = sns.boxplot(df, color = 'white')
+    plt.setp(ax.artists, edgecolor = 'k', facecolor='w')
+    plt.setp(ax.lines, color='k')
+    ax.set_xlabel('SNR [dB]')
+    ax.set_ylabel('Compression Rate')
+    ax.set_title(f'{which} Compression Rate against SNR levels')
+    ax.yaxis.set_major_formatter(ticker.PercentFormatter(1, 0))
+    plt.show()
+
+    plt.savefig(f'params/{which}/results.png')
+    plt.close()
+    
+
+
+
+
+
+        
+
+        
+
+
+
+
 
 def train():
 
@@ -89,7 +188,7 @@ def train():
         config = config,
         training_steps = int(args.amt),
         cw = info['cw'],
-        log_every = int(args.amt)//100,
+        log_every = int(args.amt)//500,
         batch_size = info['bs'],
         use_tqdm = not args.shh,
     )
@@ -125,7 +224,6 @@ def decompress():
     plt.close()
 
 def compress():
-    pass
 
     # Options for compressing
     # mRF
@@ -257,6 +355,8 @@ if __name__ == '__main__':
         compress()
     elif args.action == 'decompress':
         decompress()
+    elif args.action == 'eval':
+        eval()
     else:
         logger.error('Not a valid action')
 
