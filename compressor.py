@@ -124,6 +124,10 @@ def evaluate_compressor(
   len_data = 0
   len_datum = 0
   kld_sum = 0
+
+  #x_ld = 0
+  #x_cl = 0
+
   for i, datum in enumerate(data):
     # Get stats for context_l and n_chunks
 
@@ -145,6 +149,8 @@ def evaluate_compressor(
       pad = 0
     else:
       compressed_data, pad, kld = compress_fn(datum, params, config)
+      #x_ld += 8
+      #x_cl += (len(compressed_data) * 8) - pad + 1
       kld_sum += kld
     t1 = time.perf_counter()
     logger.debug(f'Returned {len(compressed_data)} bytes')

@@ -1,3 +1,4 @@
+# Imports
 from transformers import LlamaForCausalLM, LlamaTokenizer, GenerationConfig
 import pandas as pd
 from torch.nn import functional as F
@@ -6,43 +7,48 @@ import utils
 import audioop
 import matplotlib.pyplot as plt
 import torch
-
 import argparse
+
+# These will not be needed later
 parser = argparse.ArgumentParser()
 parser.add_argument('--size', dest = 'size')
 parser.add_argument('--offset', dest = 'offset')
 args = parser.parse_args()
 
+# Setup model, tokenizer, and device
 device = torch.device('cuda')
-# Model set-up
 tokenizer = LlamaTokenizer.from_pretrained(
     'meta-llama/Llama-2-7b-hf',
     use_fast = False,
-    padding=True,
+    padding = True,
 )
-
 tokenizer.pad_token = tokenizer.unk_token
 tokenizer.padding_side = 'left'
 model = LlamaForCausalLM.from_pretrained('meta-llama/Llama-2-7b-hf', device_map = 'auto')
 
-raw_data = np.fromfile(f'data/test/w_test.data', dtype = np.int16)
+# Grab data
+# TODO add noise component
+raw_data = np.fromfile(f'data/test/t0.data', dtype = np.int16)
 data_iq = raw_data[0::2] + 1j*raw_data[1::2]
 signal_real = np.real(data_iq).copy().astype(np.int16) 
+#signal_real = signal_real + np.random.normal(0,10,signal_real.shape).astype(np.int16)
 signal_real = signal_real.tobytes()
 biased = audioop.lin2lin(signal_real, 2, 1)
 data = audioop.bias(biased, 1, 2**7)
 ndata = np.frombuffer(data, dtype = np.uint8)
+
+# Make it ASCII compatible (will need to add 1 bit back per compressed byte)
 data = np.right_shift(ndata, 1)
 
+# TODO what?
 offset = int(args.offset)
 in_size = int(args.size)
-
-# Different paradigm
 cdata = data[offset:in_size+offset]
+# Stringify
 cdata_s = ''.join(chr(x) for x in cdata)
 
+# Keeps in proper dictionary form
 tk = tokenizer(cdata_s)
-len(tk['input_ids'])
 
 def create_sliding_window_tensors_with_mask(input_tensor, window_size, num_windows):
     # Number of tensors we can create from the sliding window
@@ -133,7 +139,9 @@ encoder = arithmetic_coder.Encoder(
     output_fn=output.append,
 )
 
-print(symbols)
+print(f'{symbols=}')
+print(f'{len(symbols)=}')
+print(f'{len(pdfs)=}')
 for symbol, pdf in zip(symbols, pdfs):
     encoder.encode(utils.normalize_pdf_for_arithmetic_coding(pdf), symbol)
 

@@ -312,8 +312,13 @@ def compress(
       log_probs.append(subsequence_probs[0, -1])
      
     log_probs = np.vstack(log_probs)
+
   else:
-    log_probs = predict_fn(sequence_array[None])[0, ...]
+    log_probs = predict_fn(sequence_array[None])[0, ...] # [0, ...] will select the first batch element specifically
+    #log_probs = predict_fn(sequence_array[None])[0, -1, ...] # [0, -1 ...] will select the first batch and last T variable (which whould be imbibed with the whole context)
+    #print(f'{log_probs=}') 
+    #print(f'{log_probs.shape=}')
+    #sys.exit(-1)
   probs = np.exp(log_probs)
 
   #kld = np.average(np.sum(
